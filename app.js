@@ -216,7 +216,7 @@ return out.join("").replace(/\s+([،,؛;.!؟?])/g,"$1");
 function convertCommands(text){
 let out=removeRepeatedWords(text);
 const replacements=[
-[/(?:افتح|حط|ضع)\s+(?:ال)?قوس(?:\s+فتح)?/gi,"("],
+[/(?:(?:افتح|حط|ضع)\s*){1,4}(?:ال)?قوس(?:\s+فتح)?/gi,"("],
 [/(?:اغلق|اقفل|سكر)\s+(?:ال)?قوس/gi,")"],
 [/علام(?:ة|ه)\s+(?:ال)?استفهام/gi,"؟"],
 [/فاصله(?:\s+عربيه)?/gi,"،"],
@@ -228,6 +228,7 @@ const replacements=[
 [/اغلق\s+علام(?:ة|ه)\s+تنصيص/gi,"”"]
 ];
 for(const [pattern,value] of replacements)out=out.replace(pattern,value);
+out=out.replace(/([()؟،.!])(?:\\s*\\1)+/g,"$1");
 return out;
 }
 if(!SR){$("voiceStart").disabled=true;status("التعرف على الكلام غير مدعوم في هذا المتصفح. جرّب Chrome حديثاً.");}
