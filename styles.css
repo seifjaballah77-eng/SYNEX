@@ -65,3 +65,20 @@ main{width:min(1120px,calc(100% - 36px))}
 .help-grid p{font-size:12px;line-height:1.9;margin-bottom:0}
 body.light .app-sidebar{background:#ffffffed}
 @media(max-width:760px){body{padding-left:0;padding-bottom:76px}.app-sidebar{top:auto;bottom:10px;left:50%;transform:translateX(-50%);width:min(94vw,520px);min-height:0;height:60px;flex-direction:row;justify-content:space-around;padding:7px;border-radius:18px;gap:3px}.side-brand,.side-tool{width:40px;height:40px;flex-basis:40px;font-size:17px}.side-divider{width:1px;height:28px;margin:0}.side-spacer{display:none}.help-grid{grid-template-columns:1fr}main{width:min(100% - 28px,560px)}}
+
+.tools-section{display:none!important}
+.image-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:12px}
+.image-thumb{min-width:0;border:1px solid var(--line);border-radius:13px;overflow:hidden;background:var(--panel)}
+.image-thumb>img{display:block;width:100%;height:125px;object-fit:cover;background:#080b17}
+.image-thumb-meta{padding:9px;display:flex;flex-direction:column;gap:5px;min-width:0}
+.image-thumb-meta>span{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.image-thumb-meta>small{font-size:10px;color:var(--muted)}
+.image-thumb-actions{display:flex;gap:6px;margin-top:5px}
+.image-thumb-actions button{padding:6px 10px;font-size:10px;min-width:0}
+.image-export-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.image-export-bar label{font-size:11px;color:var(--muted)}
+.image-export-bar select,.tool-workspace select{padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--text);font:inherit;font-size:12px}
+.image-export-bar button{font-size:11px;padding:10px 13px}
+.image-export-bar button:disabled{opacity:.5;cursor:wait}
+#ocrText,#voiceText{width:100%;padding:13px;border:1px solid var(--line);border-radius:11px;background:#080b17;color:var(--text);font:13px/1.8 Alexandria,system-ui,sans-serif;resize:vertical;direction:auto}
+@media(max-width:600px){.image-gallery{grid-template-columns:repeat(2,minmax(0,1fr))}.image-thumb>img{height:105px}.image-export-bar{align-items:stretch}.image-export-bar select,.image-export-bar button{flex:1}}
