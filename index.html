@@ -24,6 +24,7 @@
   <aside class="app-sidebar" id="appSidebar" aria-label="قائمة الأدوات">
     <button class="side-brand" id="sideHome" title="الرئيسية" aria-label="الرئيسية">S</button>
     <div class="side-divider"></div>
+    <button class="side-tool quickdrop-nav" data-tool="quickdrop" title="نقل الملفات بين الأجهزة" aria-label="نقل الملفات بين الأجهزة"><span aria-hidden="true">➤</span></button>
     <button class="side-tool" data-tool="converter" title="Converter" aria-label="Converter">⇄</button>
     <button class="side-tool" data-tool="videostudio" title="Video Studio" aria-label="Video Studio">▶</button>
     <button class="side-tool" data-tool="textlab" title="Text Lab" aria-label="Text Lab">T</button>
@@ -32,7 +33,6 @@
     <button class="side-tool" data-tool="qrreader" title="QR Reader" aria-label="QR Reader">⌗</button>
     <button class="side-tool" data-tool="screentext" title="ScreenText OCR" aria-label="ScreenText OCR">▧</button>
     <button class="side-tool" data-tool="voicetype" title="VoiceType" aria-label="VoiceType">♫</button>
-    <button class="side-tool" data-tool="quickdrop" title="QuickDrop" aria-label="QuickDrop">⇧</button>
     <div class="side-spacer"></div>
     <button class="side-tool" id="sideHistory" title="السجل" aria-label="السجل">◷</button>
     <button class="side-tool" id="sideHelp" title="مركز المساعدة" aria-label="مركز المساعدة">?</button>
@@ -51,13 +51,14 @@
 
     <section class="tools-section" id="tools">
       <div class="section-heading"><div><span class="section-kicker">WORKSPACE</span><h2>اختر أداتك</h2></div><span class="section-hint">9 أدوات • واجهة واحدة</span></div>
-      <div class="tool-grid"><button class="tool-card converter" data-tool="converter"><span class="tool-icon">⇄</span><span class="tool-tag">UNIVERSAL CONVERTER</span><strong>SYNEX Converter</strong><span class="tool-desc">تحويل الفيديو والصور والصوت والمستندات والملفات المضغوطة، واستخراج الصوت من الفيديو.</span><span class="tool-link">فتح الأداة <b>←</b></span></button>
-        <button class="tool-card videostudio" data-tool="videostudio"><span class="tool-icon">▶</span><span class="tool-tag">VIDEO EDITOR</span><strong>SYNEX Video Studio</strong><span class="tool-desc">قص ودمج الفيديو، التأثيرات، الكتابة الملونة، الصوت، والتحويل إلى GIF وMP3.</span><span class="tool-link">فتح الأداة <b>←</b></span></button>
-        <button class="tool-card textlab" data-tool="textlab"><span class="tool-icon">T</span><span class="tool-tag">TEXT UTILITIES</span><strong>SYNEX Text Lab</strong><span class="tool-desc">مولّد كلمات المرور، عدّاد الكلمات والأحرف، مقارنة النصوص وتنسيقها.</span><span class="tool-link">فتح الأداة <b>←</b></span></button>
+      <div class="tool-grid">
         <button class="tool-card quickdrop" data-tool="quickdrop">
           <span class="tool-icon">⇧</span><span class="tool-tag">SHARE</span>
           <strong>QuickDrop</strong><span class="tool-desc">نقل الملفات بين الهاتف والكمبيوتر بالجودة الأصلية.</span><span class="tool-link">فتح الأداة <b>←</b></span>
-        </button>
+        </button><button class="tool-card converter" data-tool="converter"><span class="tool-icon">⇄</span><span class="tool-tag">UNIVERSAL CONVERTER</span><strong>SYNEX Converter</strong><span class="tool-desc">تحويل الفيديو والصور والصوت والمستندات والملفات المضغوطة، واستخراج الصوت من الفيديو.</span><span class="tool-link">فتح الأداة <b>←</b></span></button>
+        <button class="tool-card videostudio" data-tool="videostudio"><span class="tool-icon">▶</span><span class="tool-tag">VIDEO EDITOR</span><strong>SYNEX Video Studio</strong><span class="tool-desc">قص ودمج الفيديو، التأثيرات، الكتابة الملونة، الصوت، والتحويل إلى GIF وMP3.</span><span class="tool-link">فتح الأداة <b>←</b></span></button>
+        <button class="tool-card textlab" data-tool="textlab"><span class="tool-icon">T</span><span class="tool-tag">TEXT UTILITIES</span><strong>SYNEX Text Lab</strong><span class="tool-desc">مولّد كلمات المرور، عدّاد الكلمات والأحرف، مقارنة النصوص وتنسيقها.</span><span class="tool-link">فتح الأداة <b>←</b></span></button>
+
         <button class="tool-card screentext" data-tool="screentext">
           <span class="tool-icon">▧</span><span class="tool-tag">OCR & DESIGN</span>
           <strong>ScreenText</strong><span class="tool-desc">استخرج النص من الصور وصمّم نصوصك بسهولة.</span><span class="tool-link">فتح الأداة <b>←</b></span>
