@@ -186,34 +186,52 @@ $("saveOcr").onclick=()=>{const value=$("ocrText").value;saveActivityFile("OCR t
 }
 function downloadText(value,name){const a=document.createElement("a"),u=URL.createObjectURL(new Blob([value],{type:"text/plain;charset=utf-8"}));a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),10000)}
 function renderVoiceType(){
-$("toolContent").innerHTML='<div class="tool-workspace"><span class="section-kicker">SYNEX VOICE FX</span><h2>تأثيرات على صوتك</h2><p>سجّل صوتك من الميكروفون، ثم غيّر سرعته ونبرته واستمع إلى النتيجة أو نزّلها كملف صوتي.</p><div class="compress-panel voice-panel"><div class="voice-live-status" id="fxStatus"><i></i><span>جاهز — اضغط بدء التسجيل واسمح باستخدام الميكروفون</span></div><div class="voice-toolbar"><button class="primary-btn" id="fxRecord">● بدء التسجيل</button><button class="ghost-btn" id="fxStop" disabled>■ إيقاف التسجيل</button></div><div class="fx-meter"><span id="fxTimer">00:00</span><span id="fxFileInfo">لم يتم تسجيل صوت بعد</span></div><label for="fxEffect">اختر تأثير الصوت</label><select id="fxEffect"><option value="1">طبيعي — السرعة الأصلية</option><option value="1.45">سريع</option><option value="1.8">سريع جداً</option><option value="0.75">بطيء</option><option value="0.55">بطيء جداً</option><option value="0.82">صوت أعمق وأبطأ</option><option value="1.25">صوت أعلى وأسرع</option><option value="1.65">صوت رفيع وكرتوني</option></select><p class="compression-note">ملاحظة: تغيير السرعة يغيّر طبقة الصوت معها؛ البطء يجعل الصوت أعمق والسرعة تجعله أعلى. لا يحتاج إلى كتابة أي نص.</p><audio id="fxAudio" class="fx-audio" controls></audio><div class="voice-toolbar"><button class="primary-btn" id="fxPlay" disabled>▶ استمع بالتأثير</button><button class="ghost-btn" id="fxDownload" disabled>تنزيل الصوت بالتأثير WAV</button></div><div class="qr-actions"><button class="ghost-btn" id="fxOriginal" disabled>تنزيل التسجيل الأصلي</button><button class="ghost-btn" id="fxClear" disabled>مسح التسجيل</button></div><p class="compression-note" id="fxResult">سيتم تجهيز نسخة WAV بالتأثير المختار عند التنزيل.</p></div></div>';
+$("toolContent").innerHTML='<div class="tool-workspace"><span class="section-kicker">SYNEX VOICE FX</span><h2>تأثيرات على صوتك</h2><p>سجّل صوتك من الميكروفون، ثم غيّر سرعته ونبرته واستمع إلى النتيجة أو نزّلها كملف صوتي.</p><div class="compress-panel voice-panel"><div class="voice-live-status" id="fxStatus"><i></i><span>جاهز — اضغط بدء التسجيل واسمح باستخدام الميكروفون</span></div><div class="voice-toolbar"><button class="primary-btn" id="fxRecord">● بدء التسجيل</button><button class="ghost-btn" id="fxStop" disabled>■ إيقاف التسجيل</button></div><div class="fx-meter"><span id="fxTimer">00:00</span><span id="fxFileInfo">لم يتم تسجيل صوت بعد</span></div><label for="fxEffect">اختر تأثير الصوت</label><select id="fxEffect"><option value="normal">طبيعي</option><option value="fast">سريع</option><option value="veryfast">سريع جداً</option><option value="slow">بطيء</option><option value="veryslow">بطيء جداً</option><option value="robot">روبوت</option><option value="alien">فضائي</option><option value="deep">صوت عميق</option><option value="monster">وحش مخيف</option><option value="chipmunk">صوت سنجاب / رفيع</option><option value="cartoon">كرتوني</option><option value="telephone">هاتف قديم</option><option value="radio">مذيع راديو</option><option value="underwater">تحت الماء</option><option value="echo">صدى واسع</option><option value="cave">كهف</option><option value="ghost">شبح</option><option value="helium">هيليوم</option><option value="vocoder">آلي إلكتروني</option><option value="megaphone">مكبر صوت</option></select><p class="compression-note">20 تأثيراً صوتياً، منها الروبوت والفضائي والوحش والشبح والهاتف القديم والصدى. اختر التأثير ثم اضغط استمع بالتأثير.</p><audio id="fxAudio" class="fx-audio" controls></audio><div class="voice-toolbar"><button class="primary-btn" id="fxPlay" disabled>▶ استمع بالتأثير</button><button class="ghost-btn" id="fxDownload" disabled>تنزيل الصوت بالتأثير WAV</button></div><div class="qr-actions"><button class="ghost-btn" id="fxOriginal" disabled>تنزيل التسجيل الأصلي</button><button class="ghost-btn" id="fxClear" disabled>مسح التسجيل</button></div><p class="compression-note" id="fxResult">سيتم تجهيز نسخة WAV بالتأثير المختار عند التنزيل.</p></div></div>';
 const status=(message,active=false)=>{$("fxStatus").querySelector("span").textContent=message;$("fxStatus").classList.toggle("recording",active)};
-let recorder=null,chunks=[],originalBlob=null,originalUrl=null,timer=null,startedAt=0;
+let recorder=null,chunks=[],originalBlob=null,originalUrl=null,timer=null,startedAt=0,processedBlob=null,processedUrl=null,processedKey="";
 const recordBtn=$("fxRecord"),stopBtn=$("fxStop"),audio=$("fxAudio"),effect=$("fxEffect");
+const presets={
+normal:{rate:1},fast:{rate:1.45},veryfast:{rate:1.8},slow:{rate:.75},veryslow:{rate:.55},
+robot:{rate:1,robot:32,dist:18,band:1500},alien:{rate:1.3,robot:48,echo:.12,high:2600},deep:{rate:.78,low:850},monster:{rate:.72,dist:35,low:650,echo:.16},chipmunk:{rate:1.55,high:3400},
+cartoon:{rate:1.22,dist:8,high:2600},telephone:{rate:1,band:1250,dist:4},radio:{rate:1,band:2200,dist:10},underwater:{rate:.9,low:650,echo:.22},echo:{rate:1,echo:.42},cave:{rate:.92,echo:.58,low:1800},ghost:{rate:.82,echo:.5,robot:8,high:2100},helium:{rate:1.65,high:3800},vocoder:{rate:1,robot:65,band:1900,dist:22},megaphone:{rate:1,band:1700,dist:28}
+};
 function setReady(ready){$("fxPlay").disabled=!ready;$("fxDownload").disabled=!ready;$("fxOriginal").disabled=!ready;$("fxClear").disabled=!ready}
 function elapsed(){const seconds=Math.floor((Date.now()-startedAt)/1000);$("fxTimer").textContent=String(Math.floor(seconds/60)).padStart(2,"0")+":"+String(seconds%60).padStart(2,"0")}
-function clearRecording(){if(originalUrl)URL.revokeObjectURL(originalUrl);originalUrl=null;originalBlob=null;chunks=[];audio.removeAttribute("src");audio.load();$("fxTimer").textContent="00:00";$("fxFileInfo").textContent="لم يتم تسجيل صوت بعد";$("fxResult").textContent="سيتم تجهيز نسخة WAV بالتأثير المختار عند التنزيل.";setReady(false);status("جاهز — اضغط بدء التسجيل واسمح باستخدام الميكروفون")}
+function clearProcessed(){if(processedUrl)URL.revokeObjectURL(processedUrl);processedUrl=null;processedBlob=null;processedKey="";audio.removeAttribute("src");audio.load()}
+function clearRecording(){if(originalUrl)URL.revokeObjectURL(originalUrl);originalUrl=null;originalBlob=null;chunks=[];clearProcessed();$("fxTimer").textContent="00:00";$("fxFileInfo").textContent="لم يتم تسجيل صوت بعد";$("fxResult").textContent="اختر تأثيراً ثم اضغط استمع بالتأثير.";setReady(false);status("جاهز — اضغط بدء التسجيل واسمح باستخدام الميكروفون")}
 recordBtn.onclick=async()=>{
 if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia||!window.MediaRecorder){status("تسجيل الميكروفون غير مدعوم في هذا المتصفح. افتح الموقع عبر HTTPS واستخدم Chrome.");return}
-try{
-recordBtn.disabled=true;status("بانتظار إذن الميكروفون...");
-const stream=await navigator.mediaDevices.getUserMedia({audio:true});
-chunks=[];
+try{recordBtn.disabled=true;status("بانتظار إذن الميكروفون...");const stream=await navigator.mediaDevices.getUserMedia({audio:true});chunks=[];
 const mime=MediaRecorder.isTypeSupported("audio/webm;codecs=opus")?"audio/webm;codecs=opus":(MediaRecorder.isTypeSupported("audio/webm")?"audio/webm":"");
-recorder=new MediaRecorder(stream,mime?{mimeType:mime}:{});
-recorder.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
+recorder=new MediaRecorder(stream,mime?{mimeType:mime}:{});recorder.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
 recorder.onerror=()=>{stream.getTracks().forEach(t=>t.stop());recordBtn.disabled=false;stopBtn.disabled=true;clearInterval(timer);status("حدث خطأ أثناء التسجيل.")};
-recorder.onstop=()=>{
-stream.getTracks().forEach(t=>t.stop());clearInterval(timer);recordBtn.disabled=false;stopBtn.disabled=true;
-originalBlob=new Blob(chunks,{type:recorder.mimeType||"audio/webm"});originalUrl=URL.createObjectURL(originalBlob);audio.src=originalUrl;audio.playbackRate=Number(effect.value);audio.preservesPitch=false;audio.webkitPreservesPitch=false;
-$("fxFileInfo").textContent="تم التسجيل — "+(originalBlob.size/1024).toFixed(1)+" KB";setReady(true);status("اكتمل التسجيل — اختر التأثير واستمع");
-};
-recorder.start();startedAt=Date.now();elapsed();timer=setInterval(elapsed,500);stopBtn.disabled=false;status("يتم تسجيل صوتك الآن...",true);
+recorder.onstop=()=>{stream.getTracks().forEach(t=>t.stop());clearInterval(timer);recordBtn.disabled=false;stopBtn.disabled=true;if(originalUrl)URL.revokeObjectURL(originalUrl);clearProcessed();originalBlob=new Blob(chunks,{type:recorder.mimeType||"audio/webm"});originalUrl=URL.createObjectURL(originalBlob);$("fxFileInfo").textContent="تم التسجيل — "+(originalBlob.size/1024).toFixed(1)+" KB";setReady(true);status("اكتمل التسجيل — اختر واحداً من التأثيرات العشرين")};
+recorder.start();startedAt=Date.now();elapsed();timer=setInterval(elapsed,500);stopBtn.disabled=false;status("يتم تسجيل صوتك الآن...",true)
 }catch(error){recordBtn.disabled=false;status("تعذر فتح الميكروفون: "+(error.message||"تحقق من الإذن والاتصال الآمن HTTPS"))}
 };
 stopBtn.onclick=()=>{if(recorder&&recorder.state!=="inactive")recorder.stop()};
-effect.onchange=()=>{audio.playbackRate=Number(effect.value);audio.preservesPitch=false;audio.webkitPreservesPitch=false;$("fxResult").textContent="التأثير المحدد: "+effect.options[effect.selectedIndex].text+" — اضغط استمع بالتأثير."};
-$("fxPlay").onclick=async()=>{if(!originalBlob)return;audio.playbackRate=Number(effect.value);audio.preservesPitch=false;audio.webkitPreservesPitch=false;try{audio.currentTime=0;await audio.play();status("يتم تشغيل صوتك بالتأثير المختار...",true)}catch(_){status("اضغط تشغيل من مشغل الصوت للسماع.")}};
+effect.onchange=()=>{clearProcessed();$("fxResult").textContent="التأثير المحدد: "+effect.options[effect.selectedIndex].text+" — اضغط استمع بالتأثير."};
+async function renderSelectedEffect(){
+if(!originalBlob)throw new Error("سجّل صوتك أولاً");
+const key=effect.value;if(processedBlob&&processedKey===key)return processedBlob;
+const AudioCtx=window.AudioContext||window.webkitAudioContext,Offline=window.OfflineAudioContext||window.webkitOfflineAudioContext;
+if(!AudioCtx||!Offline)throw new Error("معالجة التأثيرات غير مدعومة في هذا المتصفح");
+const decodeCtx=new AudioCtx();let decoded;
+try{decoded=await decodeCtx.decodeAudioData(await originalBlob.arrayBuffer())}finally{await decodeCtx.close()}
+const p=presets[key]||presets.normal,rate=p.rate||1,tail=Math.max(p.echo?2.8:0,0.15),duration=decoded.duration/rate+tail;
+const offline=new Offline(decoded.numberOfChannels,Math.ceil(duration*decoded.sampleRate),decoded.sampleRate);
+const source=offline.createBufferSource();source.buffer=decoded;source.playbackRate.value=rate;
+let node=source;
+if(p.band){const filter=offline.createBiquadFilter();filter.type="bandpass";filter.frequency.value=p.band;filter.Q.value=0.8;node.connect(filter);node=filter}
+else if(p.low||p.high){const filter=offline.createBiquadFilter();filter.type=p.low?"lowpass":"highpass";filter.frequency.value=p.low||p.high;node.connect(filter);node=filter}
+if(p.dist){const shaper=offline.createWaveShaper();const curve=new Float32Array(44100);const amount=p.dist;for(let i=0;i<curve.length;i++){const x=i*2/(curve.length-1)-1;curve[i]=(1+amount/30)*x/(1+(amount/30)*Math.abs(x))}shaper.curve=curve;shaper.oversample="2x";node.connect(shaper);node=shaper}
+const output=offline.createGain();output.gain.value=p.echo?0.82:1;node.connect(output);output.connect(offline.destination);
+if(p.echo){const delay=offline.createDelay(2);delay.delayTime.value=.24;const feedback=offline.createGain();feedback.gain.value=Math.min(.68,p.echo*.85);const wet=offline.createGain();wet.gain.value=Math.min(.85,p.echo);node.connect(delay);delay.connect(feedback);feedback.connect(delay);delay.connect(wet);wet.connect(offline.destination)}
+if(p.robot){const osc=offline.createOscillator(),mod=offline.createGain(),ring=offline.createGain();osc.type="square";osc.frequency.value=p.robot;mod.gain.value=.48;osc.connect(mod);mod.connect(ring.gain);ring.gain.value=.52;node.connect(ring);ring.connect(offline.destination);osc.start(0);osc.stop(duration)}
+source.start(0);
+const rendered=await offline.startRendering();processedBlob=encodeWav(rendered);processedKey=key;processedUrl=URL.createObjectURL(processedBlob);return processedBlob
+}
+$("fxPlay").onclick=async()=>{if(!originalBlob)return;const button=$("fxPlay");button.disabled=true;$("fxResult").textContent="جارٍ تطبيق التأثير...";try{await renderSelectedEffect();audio.src=processedUrl;audio.playbackRate=1;await audio.play();status("يتم تشغيل: "+effect.options[effect.selectedIndex].text,true);$("fxResult").textContent="تم تطبيق التأثير. يمكنك الاستماع أو تنزيل النسخة."}catch(error){$("fxResult").textContent="تعذر تطبيق التأثير: "+(error.message||"خطأ غير معروف");status("تعذر تجهيز التأثير")}finally{button.disabled=false}};
 audio.onended=()=>status("انتهى تشغيل الصوت بالتأثير.");
 function encodeWav(buffer){
 const channels=buffer.numberOfChannels,samples=buffer.length,bytes=44+samples*channels*2,array=new ArrayBuffer(bytes),view=new DataView(array);
@@ -223,18 +241,7 @@ const data=[];for(let c=0;c<channels;c++)data.push(buffer.getChannelData(c));let
 for(let i=0;i<samples;i++)for(let c=0;c<channels;c++){let sample=Math.max(-1,Math.min(1,data[c][i]));view.setInt16(offset,sample<0?sample*32768:sample*32767,true);offset+=2}
 return new Blob([array],{type:"audio/wav"});
 }
-$("fxDownload").onclick=async()=>{
-if(!originalBlob)return;
-const button=$("fxDownload"),rate=Number(effect.value);button.disabled=true;$("fxResult").textContent="جارٍ تجهيز ملف WAV بالتأثير...";
-let context=null;
-try{
-const bytes=await originalBlob.arrayBuffer();const AudioCtx=window.AudioContext||window.webkitAudioContext;if(!AudioCtx||!window.OfflineAudioContext){throw new Error("تحويل الصوت غير مدعوم في هذا المتصفح")}
-context=new AudioCtx();const decoded=await context.decodeAudioData(bytes);await context.close();context=null;
-const Offline=window.OfflineAudioContext||window.webkitOfflineAudioContext;const length=Math.max(1,Math.ceil(decoded.length/rate));const offline=new Offline(decoded.numberOfChannels,length,decoded.sampleRate);const source=offline.createBufferSource();source.buffer=decoded;source.playbackRate.value=rate;source.connect(offline.destination);source.start(0);
-const rendered=await offline.startRendering(),wav=encodeWav(rendered),name="SYNEX-Voice-FX-"+Date.now()+".wav";saveActivityFile(name,"Voice effect",name,wav).catch(()=>{});downloadBlob(wav,name);$("fxResult").textContent="تم تجهيز وتنزيل نسخة WAV بالتأثير المختار، وأضيفت إلى سجل الملفات.";
-}catch(error){$("fxResult").textContent="تعذر تجهيز نسخة WAV: "+(error.message||"خطأ غير معروف")+". يمكنك الاستماع إلى التأثير من المشغل."}
-finally{if(context)try{await context.close()}catch(_){}button.disabled=false}
-};
+$("fxDownload").onclick=async()=>{if(!originalBlob)return;const button=$("fxDownload");button.disabled=true;$("fxResult").textContent="جارٍ تجهيز ملف WAV بالتأثير...";try{const wav=await renderSelectedEffect(),name="SYNEX-Voice-"+effect.value+"-"+Date.now()+".wav";saveActivityFile(name,"Voice effect",name,wav).catch(()=>{});downloadBlob(wav,name);$("fxResult").textContent="تم تنزيل الصوت بالتأثير بصيغة WAV وحفظه في سجل الملفات."}catch(error){$("fxResult").textContent="تعذر تجهيز WAV: "+(error.message||"خطأ غير معروف")}finally{button.disabled=false}};
 $("fxOriginal").onclick=()=>{if(originalBlob)downloadBlob(originalBlob,"SYNEX-Voice-Original.webm")};
 $("fxClear").onclick=()=>{if(recorder&&recorder.state!=="inactive")recorder.stop();clearRecording()};
 setReady(false);
