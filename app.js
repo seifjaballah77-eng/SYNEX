@@ -94,7 +94,7 @@ $("toolContent").innerHTML=`
 <label class="file-drop" for="batchFiles"><span class="drop-symbol">⇣</span><strong>اختر مجموعة ملفات</strong><small>ستتم معالجتها تباعاً داخل ZIP واحد</small></label><input id="batchFiles" type="file" multiple class="hidden"><div id="batchPicked" class="picked-file hidden"></div>
 <p class="compression-note">الدفعات تُجمع في أرشيف واحد لتسهيل التنزيل بدلاً من ظهور نوافذ تنزيل كثيرة.</p>
 </div>
-<div id="imagePreviewPanel" class="image-preview-panel hidden"><div class="preview-heading"><b>معاينة الصورة قبل التنزيل</b><small>حرّك عجلة الفأرة للتكبير والتصغير • اسحب الصورة للتحريك</small></div><div class="preview-stage" id="previewStage"><img id="previewImage" alt="معاينة الصورة الأصلية داخل الأرشيف"></div><div class="preview-controls"><button class="ghost-btn" id="zoomOut">−</button><span id="zoomLabel">100%</span><button class="ghost-btn" id="zoomIn">＋</button><button class="ghost-btn" id="zoomReset">إعادة</button></div><p class="compression-note">هذه معاينة للصورة الأصلية التي ستوضع داخل ZIP؛ لم يتم تعديل أبعادها أو جودتها.</p></div>
+<div id="imagePreviewPanel" class="image-preview-panel hidden"><div class="preview-heading"><b>معرض الصور</b><small>معاينة جميع الصور المختارة قبل التنزيل • اضغط الصورة لعرضها مكبّرة</small></div><div id="imageGallery" class="image-gallery"></div><div class="image-export-bar"><label for="imageExportFormat">صيغة الصور</label><select id="imageExportFormat"><option value="image/png">PNG</option><option value="image/jpeg">JPEG</option></select><button class="ghost-btn" id="downloadAllImages">تنزيل الصور كلها ZIP</button></div><div class="preview-stage hidden" id="previewStage"><img id="previewImage" alt="معاينة الصورة المحددة"></div><div class="preview-controls hidden" id="previewControls"><button class="ghost-btn" id="zoomOut">−</button><span id="zoomLabel">100%</span><button class="ghost-btn" id="zoomIn">＋</button><button class="ghost-btn" id="zoomReset">إعادة</button></div><p class="compression-note">PNG يحافظ على الجودة دون فقدان. JPEG قد يقلل الحجم مع فقدان بسيط في الجودة، والخلفية الشفافة تصبح بيضاء.</p></div>
 <div id="resultStats" class="result-stats hidden"><div><small>الحجم قبل الضغط</small><b id="originalSize">—</b></div><div><small>حجم الأرشيف</small><b id="compressedSize">—</b></div><div><small>التوفير</small><b id="savedPercent">—</b></div></div>
 <div class="progress-wrap hidden" id="progressWrap"><div class="progress-track"><span id="progressBar"></span></div><small id="progressStatus">جارٍ التحضير...</small></div>
 <button class="primary-btn action-wide" id="runCompress" disabled>ابدأ الضغط</button><button class="primary-btn action-wide hidden" id="downloadResult">تنزيل الملف الآن</button>
@@ -116,7 +116,43 @@ function setMulti(files,target){selected=[...files];if(!selected.length)return;c
 $("multiFiles").onchange=()=>setMulti($("multiFiles").files,"multiPicked");
 $("folderFiles").onchange=()=>setMulti($("folderFiles").files,"multiPicked");
 $("batchFiles").onchange=()=>setMulti($("batchFiles").files,"batchPicked");
-function showImagePreview(files){const img=files.find(f=>f.type.startsWith("image/"));if(!img){$("imagePreviewPanel").classList.add("hidden");return}const url=URL.createObjectURL(img);$("previewImage").src=url;$("imagePreviewPanel").classList.remove("hidden");zoom=1;applyZoom()}
+let previewUrls=[];
+function showImagePreview(files){
+previewUrls.forEach(u=>URL.revokeObjectURL(u));previewUrls=[];
+const images=files.filter(f=>f.type.startsWith("image/"));
+if(!images.length){$("imagePreviewPanel").classList.add("hidden");return}
+const gallery=$("imageGallery");gallery.innerHTML="";
+images.forEach((file,index)=>{
+const url=URL.createObjectURL(file);previewUrls.push(url);
+const card=document.createElement("article");card.className="image-thumb";
+const img=document.createElement("img");img.src=url;img.alt=file.name;img.loading="lazy";
+const meta=document.createElement("div");meta.className="image-thumb-meta";
+const name=document.createElement("span");name.textContent=file.name;
+const size=document.createElement("small");size.textContent=formatBytes(file.size);
+const actions=document.createElement("div");actions.className="image-thumb-actions";
+const view=document.createElement("button");view.className="ghost-btn";view.type="button";view.textContent="عرض";view.title="عرض الصورة";
+const save=document.createElement("button");save.className="ghost-btn";save.type="button";save.textContent="↓";save.title="تنزيل هذه الصورة";
+view.onclick=()=>{const stage=$("previewStage");stage.classList.remove("hidden");$("previewControls").classList.remove("hidden");$("previewImage").src=url;zoom=1;applyZoom();stage.scrollTop=0;stage.scrollLeft=0};
+save.onclick=async()=>{try{const blob=await convertImage(file,$("imageExportFormat").value);downloadBlob(blob,outputImageName(file,$("imageExportFormat").value));recordActivity(file.name,"Image export");toast("تم تجهيز الصورة")}catch(e){toast("تعذر تحويل الصورة: "+e.message)}};
+actions.append(view,save);meta.append(name,size,actions);card.append(img,meta);gallery.append(card);
+});
+$("imagePreviewPanel").classList.remove("hidden");
+$("previewStage").classList.add("hidden");$("previewControls").classList.add("hidden");
+$("downloadAllImages").onclick=async()=>{
+const button=$("downloadAllImages");button.disabled=true;
+try{if(!window.fflate)throw Error("مكتبة ZIP غير متاحة");const fmt=$("imageExportFormat").value,ext=fmt==="image/png"?"png":"jpg",entries={};
+for(let i=0;i<images.length;i++){const blob=await convertImage(images[i],fmt);entries[outputImageName(images[i],fmt)]=new Uint8Array(await blob.arrayBuffer());}
+const zipped=fflate.zipSync(entries,{level:0});downloadBlob(new Blob([zipped],{type:"application/zip"}),"SYNEX-Images-"+Date.now()+".zip");recordActivity(images.length+" images","ZIP image export");toast("تم تجهيز أرشيف الصور")}
+catch(e){toast("تعذر إنشاء ZIP: "+e.message)}finally{button.disabled=false}
+};
+}
+async function convertImage(file,mime){
+const bitmap=await createImageBitmap(file),canvas=document.createElement("canvas");canvas.width=bitmap.width;canvas.height=bitmap.height;
+const ctx=canvas.getContext("2d");if(mime==="image/jpeg"){ctx.fillStyle="#ffffff";ctx.fillRect(0,0,canvas.width,canvas.height)}ctx.drawImage(bitmap,0,0);bitmap.close();
+return await new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(Error("فشل تحويل الصورة")),mime,mime==="image/jpeg"?.92:undefined));
+}
+function outputImageName(file,mime){const base=file.name.replace(/\.[^.]+$/,"");return base+"."+(mime==="image/png"?"png":"jpg")}
+function downloadBlob(blob,name){const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),30000)}
 function applyZoom(){$("previewImage").style.transform="scale("+zoom+")";$("zoomLabel").textContent=Math.round(zoom*100)+"%"}
 function changeZoom(v){zoom=Math.min(8,Math.max(.2,zoom*v));applyZoom()}
 $("previewStage").addEventListener("wheel",e=>{e.preventDefault();changeZoom(e.deltaY<0?1.15:1/1.15)},{passive:false});
