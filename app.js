@@ -2,6 +2,30 @@
 const $=id=>document.getElementById(id), dialog=$("loginDialog"), toastEl=$("toast");
 let toastTimer,isGuest=true,isSignedIn=false,supabaseClient=null;
 function toast(m){toastEl.textContent=m;toastEl.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>toastEl.classList.remove("show"),3000)}
+let qrLibraryPromises={};
+function loadQrLibrary(kind){
+ if(kind==="generator"&&window.QRCode)return Promise.resolve(true);
+ if(kind==="reader"&&window.jsQR)return Promise.resolve(true);
+ if(qrLibraryPromises[kind])return qrLibraryPromises[kind];
+ const urls=kind==="generator"
+ ?["https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js","https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js","https://unpkg.com/qrcodejs@1.0.0/qrcode.min.js"]
+ :["https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js","https://unpkg.com/jsqr@1.4.0/dist/jsQR.js","https://cdnjs.cloudflare.com/ajax/libs/jsqr/1.4.0/jsQR.min.js"];
+ qrLibraryPromises[kind]=(async()=>{
+  for(const src of urls){
+   try{
+    await new Promise((resolve,reject)=>{
+     const script=document.createElement("script");script.src=src;script.async=true;
+     script.onload=resolve;script.onerror=()=>{script.remove();reject(new Error("load failed"))};
+     document.head.appendChild(script);
+    });
+    if((kind==="generator"&&window.QRCode)||(kind==="reader"&&window.jsQR))return true;
+   }catch(_){}
+  }
+  qrLibraryPromises[kind]=null;return false;
+ })();
+ return qrLibraryPromises[kind];
+}
+
 // SYNEX يعمل مباشرة دون حساب أو تسجيل دخول.
 // سجل النشاط والعمليات يحتفظ بهما هذا الجهاز لمدة 48 ساعة فقط.
 $("openLogin").classList.add("hidden");
@@ -173,7 +197,7 @@ $("qdChooseFolder").onclick=async()=>{try{if(!window.showDirectoryPicker){toast(
 $("qdFiles").onchange=()=>{files=Array.from($("qdFiles").files||[]);$("qdFileList").innerHTML="";files.forEach(f=>{const row=document.createElement("div");row.className="qd-file";const n=document.createElement("span"),s=document.createElement("small");n.textContent=f.name;s.textContent=formatBytes(f.size);row.append(n,s);$("qdFileList").append(row)});$("qdCreate").disabled=!files.length};
 $("qdCreate").onclick=()=>{
 if(!files.length)return;cleanup();const p=initPeer();if(!p)return;$("qdCreate").disabled=true;status("جارٍ إنشاء رابط المشاركة...");
-p.on("open",id=>{const u=new URL(location.href);u.searchParams.set("quickdrop",id);$("qdLink").value=u.href;$("qdShare").classList.remove("hidden");$("qdQr").innerHTML="";if(window.QRCode)new QRCode($("qdQr"),{text:u.href,width:220,height:220});else $("qdQr").textContent="تعذر إنشاء QR؛ انسخ الرابط.";status("الرابط جاهز — بانتظار المستلم","success")});
+p.on("open",async id=>{const u=new URL(location.href);u.searchParams.set("quickdrop",id);$("qdLink").value=u.href;$("qdShare").classList.remove("hidden");$("qdQr").innerHTML="جارٍ إنشاء رمز المشاركة...";if(await loadQrLibrary("generator")){ $("qdQr").innerHTML="";new window.QRCode($("qdQr"),{text:u.href,width:220,height:220,correctLevel:window.QRCode.CorrectLevel.H});}else $("qdQr").textContent="تعذر إنشاء QR؛ استخدم زر نسخ الرابط.";status("الرابط جاهز — بانتظار المستلم","success")});
 p.on("connection",incoming=>{if(conn){incoming.close();return}bindConnection(incoming);incoming.on("open",()=>{status("تم اتصال المستلم — جارٍ الإرسال","working");sendMessage({type:"ready"});sendAll()})});
 };
 $("qdCopy").onclick=async()=>{try{await navigator.clipboard.writeText($("qdLink").value);toast("تم نسخ الرابط")}catch(_){$("qdLink").select();document.execCommand("copy");toast("انسخ الرابط الآن")}};
@@ -640,19 +664,92 @@ $("clearHistory").onclick=()=>{if(confirm("مسح سجل العمليات الم
 renderHistory();updateLevel();
 }
 function renderQrGenerator(){
-$("toolContent").innerHTML=`<div class="tool-workspace"><span class="section-kicker">QR CODE CREATOR</span><h2>إنشاء رمز QR</h2><p>اكتب رابطاً أو نصاً، أو اختر ملفاً لإنشاء QR يحمل اسمه ومعلوماته. لإنشاء QR يفتح ملفاً للآخرين، يجب أن يكون الملف مرفوعاً على رابط يمكنهم الوصول إليه.</p><div class="compress-panel"><label>النص أو الرابط</label><textarea id="qrInput" rows="4" placeholder="https://example.com أو اكتب نصك هنا"></textarea><label class="file-drop" for="qrFile"><span class="drop-symbol">＋</span><strong>أو اختر ملفاً لإنشاء QR باسمه</strong><small>ملاحظة: QR لا يضمّن الملف نفسه؛ سيحمل اسمه فقط</small></label><input id="qrFile" type="file" class="hidden"><button class="primary-btn action-wide" id="makeQr">إنشاء QR</button><div id="qrOutput" class="qr-output hidden"><div id="qrCanvas"></div><button class="primary-btn" id="downloadQr">تنزيل صورة QR</button></div></div></div>`;
-let qrText="";$("qrFile").onchange=()=>{const f=$("qrFile").files[0];if(f)$("qrInput").value="اسم الملف: "+f.name+" | الحجم: "+formatBytes(f.size)};
-$("makeQr").onclick=()=>{qrText=$("qrInput").value.trim();if(!qrText){toast("اكتب نصاً أو رابطاً أولاً");return}if(!window.QRCode){toast("مكتبة QR لم تُحمّل؛ تحقق من الاتصال");return}$("qrCanvas").innerHTML="";$("qrOutput").classList.remove("hidden");new QRCode($("qrCanvas"),{text:qrText,width:280,height:280,colorDark:"#10152b",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.H});};
-$("downloadQr").onclick=()=>{const canvas=$("qrCanvas").querySelector("canvas"),img=$("qrCanvas").querySelector("img");const url=canvas?canvas.toDataURL("image/png"):img&&img.src;if(!url)return;const a=document.createElement("a");a.href=url;a.download="SYNEX-QR.png";a.click()};
+$("toolContent").innerHTML=`<div class="tool-workspace"><span class="section-kicker">QR CODE CREATOR</span><h2>إنشاء رمز QR</h2><p>اكتب رابطاً أو نصاً لإنشاء رمز قابل للمسح بكاميرا الهاتف. اختيار ملف يضيف اسمه وحجمه فقط ولا يرفع الملف.</p><div class="compress-panel"><label>النص أو الرابط</label><textarea id="qrInput" rows="4" placeholder="https://example.com أو اكتب نصك هنا"></textarea><label class="file-drop" for="qrFile"><span class="drop-symbol">＋</span><strong>أو اختر ملفاً لإضافة اسمه إلى QR</strong><small>لا يتم تضمين الملف نفسه داخل الرمز</small></label><input id="qrFile" type="file" class="hidden"><button class="primary-btn action-wide" id="makeQr">إنشاء QR</button><div id="qrOutput" class="qr-output hidden"><div id="qrCanvas"></div><button class="primary-btn" id="downloadQr">تنزيل صورة QR</button></div><p id="qrMakeStatus" class="compression-note" aria-live="polite"></p></div></div>`;
+$("qrFile").onchange=()=>{const f=$("qrFile").files[0];if(f)$("qrInput").value="اسم الملف: "+f.name+" | الحجم: "+formatBytes(f.size)};
+$("makeQr").onclick=async()=>{
+ const value=$("qrInput").value.trim();if(!value){toast("اكتب نصاً أو رابطاً أولاً");return}
+ $("makeQr").disabled=true;$("qrMakeStatus").textContent="جارٍ تجهيز مكتبة QR...";
+ try{
+  if(!await loadQrLibrary("generator"))throw new Error("تعذر تحميل مكتبة إنشاء QR. تحقق من اتصال الإنترنت ثم أعد المحاولة.");
+  $("qrCanvas").innerHTML="";$("qrOutput").classList.remove("hidden");
+  new window.QRCode($("qrCanvas"),{text:value,width:300,height:300,colorDark:"#10152b",colorLight:"#ffffff",correctLevel:window.QRCode.CorrectLevel.H});
+  $("qrMakeStatus").textContent="تم إنشاء الرمز. امسحه بكاميرا الهاتف للتأكد من محتواه.";
+ }catch(e){$("qrMakeStatus").textContent=e.message;toast(e.message)}
+ finally{$("makeQr").disabled=false}
+};
+$("downloadQr").onclick=()=>{
+ const canvas=$("qrCanvas").querySelector("canvas"),img=$("qrCanvas").querySelector("img");
+ let url="";if(canvas){try{url=canvas.toDataURL("image/png")}catch(_){}}else if(img&&img.complete)url=img.src;
+ if(!url){toast("انتظر ظهور صورة QR ثم حاول التنزيل");return}
+ const a=document.createElement("a");a.href=url;a.download="SYNEX-QR.png";document.body.appendChild(a);a.click();a.remove();
+};
 }
 function renderQrReader(){
-$("toolContent").innerHTML=`<div class="tool-workspace"><span class="section-kicker">QR IMAGE SCANNER</span><h2>افتح QR من صورة</h2><p>ارفع صورة محفوظة في هاتفك أو الكمبيوتر. سيقرأ SYNEX رمز QR ويعرض النص أو الرابط.</p><div class="compress-panel"><label class="file-drop" for="qrImage"><span class="drop-symbol">▦</span><strong>اختر صورة تحتوي على QR</strong><small>PNG أو JPG أو WebP</small></label><input id="qrImage" type="file" accept="image/*" class="hidden"><div class="qr-preview hidden" id="qrPreview"><img id="qrImagePreview" alt="معاينة الصورة"></div><div class="qr-result hidden" id="qrResult"><b>محتوى رمز QR</b><textarea id="qrText" readonly rows="4"></textarea><div class="qr-actions"><button class="primary-btn" id="copyQr">نسخ المحتوى</button><a class="ghost-btn hidden" id="openQr" target="_blank" rel="noopener">فتح الرابط</a></div></div><p class="compression-note" id="qrStatus">إذا كان QR يحتوي رابط تنزيل، افتح الرابط للوصول إلى الملف. لا يمكن استرجاع ملف لا يحتوي الرمز على رابط له.</p></div></div>`;
-$("qrImage").onchange=()=>{const f=$("qrImage").files[0];if(!f)return;const im=new Image(),url=URL.createObjectURL(f);im.onload=()=>{$("qrPreview").classList.remove("hidden");$("qrImagePreview").src=url;const c=document.createElement("canvas"),ctx=c.getContext("2d",{willReadFrequently:true}),s=Math.min(1,1800/Math.max(im.naturalWidth,im.naturalHeight));c.width=Math.round(im.naturalWidth*s);c.height=Math.round(im.naturalHeight*s);ctx.drawImage(im,0,0,c.width,c.height);const d=ctx.getImageData(0,0,c.width,c.height),code=window.jsQR&&jsQR(d.data,d.width,d.height,{inversionAttempts:"attemptBoth"});if(!code){$("qrStatus").textContent="لم نعثر على QR واضح. جرّب صورة أوضح.";return}$("qrResult").classList.remove("hidden");$("qrText").value=code.data;const link=$("openQr");if(/^https?:\/\//i.test(code.data)){link.href=code.data;link.classList.remove("hidden")}else link.classList.add("hidden");$("qrStatus").textContent="تمت قراءة الرمز بنجاح.";URL.revokeObjectURL(url)};im.onerror=()=>{$("qrStatus").textContent="تعذر فتح الصورة"};im.src=url};
-$("copyQr").onclick=async()=>{try{await navigator.clipboard.writeText($("qrText").value);toast("تم النسخ")}catch(_){$("qrText").select();document.execCommand("copy")}}
+$("toolContent").innerHTML=`<div class="tool-workspace"><span class="section-kicker">QR IMAGE SCANNER</span><h2>قراءة رمز QR</h2><p>اختر صورة تحتوي على QR لقراءة الرابط أو النص. تتم القراءة على جهازك دون رفع الصورة.</p><div class="compress-panel"><label class="file-drop" for="qrImage"><span class="drop-symbol">▦</span><strong>اختر صورة QR من جهازك</strong><small>PNG أو JPG أو WebP</small></label><input id="qrImage" type="file" accept="image/*" class="hidden"><div class="qr-preview hidden" id="qrPreview"><img id="qrImagePreview" alt="معاينة الصورة"></div><div class="qr-result hidden" id="qrResult"><b>محتوى رمز QR</b><textarea id="qrText" readonly rows="4"></textarea><div class="qr-actions"><button class="primary-btn" id="copyQr">نسخ المحتوى</button><a class="ghost-btn hidden" id="openQr" target="_blank" rel="noopener">فتح الرابط</a></div></div><p class="compression-note" id="qrStatus" aria-live="polite">اختر صورة واضحة يظهر فيها الرمز كاملاً.</p></div></div>`;
+$("qrImage").onchange=async()=>{
+ const f=$("qrImage").files[0];if(!f)return;
+ $("qrStatus").textContent="جارٍ قراءة الصورة...";
+ $("qrResult").classList.add("hidden");
+ const url=URL.createObjectURL(f),im=new Image();
+ im.onload=async()=>{
+  try{
+   $("qrPreview").classList.remove("hidden");$("qrImagePreview").src=url;
+   const c=document.createElement("canvas"),ctx=c.getContext("2d",{willReadFrequently:true});
+   const scale=Math.min(1,2400/Math.max(im.naturalWidth,im.naturalHeight));
+   c.width=Math.max(1,Math.round(im.naturalWidth*scale));c.height=Math.max(1,Math.round(im.naturalHeight*scale));
+   ctx.drawImage(im,0,0,c.width,c.height);
+   let decoded=null;
+   if("BarcodeDetector"in window){
+    try{const detector=new BarcodeDetector({formats:["qr_code"]});const found=await detector.detect(c);if(found.length)decoded=found[0].rawValue}catch(_){}
+   }
+   if(!decoded&&await loadQrLibrary("reader")){
+    const pixels=ctx.getImageData(0,0,c.width,c.height);
+    const result=window.jsQR(pixels.data,pixels.width,pixels.height,{inversionAttempts:"attemptBoth"});
+    if(result)decoded=result.data;
+   }
+   if(!decoded){$("qrStatus").textContent="لم يتم العثور على رمز QR. جرّب صورة أوضح، واجعل الرمز كاملاً وغير مقصوص.";return}
+   $("qrResult").classList.remove("hidden");$("qrText").value=decoded;
+   const link=$("openQr");if(/^https?:\/\//i.test(decoded)){link.href=decoded;link.classList.remove("hidden")}else link.classList.add("hidden");
+   $("qrStatus").textContent="تمت قراءة الرمز بنجاح.";
+  }catch(e){$("qrStatus").textContent="تعذرت قراءة الصورة: "+e.message}
+  finally{URL.revokeObjectURL(url)}
+ };
+ im.onerror=()=>{URL.revokeObjectURL(url);$("qrStatus").textContent="تعذر فتح الصورة. جرّب ملف صورة آخر."};
+ im.src=url;
+};
+$("copyQr").onclick=async()=>{try{await navigator.clipboard.writeText($("qrText").value);toast("تم النسخ")}catch(_){$("qrText").select();document.execCommand("copy");toast("تم النسخ")}}
 }
 $("backHome").onclick=showHome;
 $("accountButton").onclick=async()=>{if(supabaseClient&&confirm("هل تريد تسجيل الخروج؟")){const{error}=await supabaseClient.auth.signOut();if(!error)location.reload()}};
 window.addEventListener("online",()=>toast("عاد الاتصال بالإنترنت"));window.addEventListener("offline",()=>toast("أنت غير متصل بالإنترنت"));
+
+let deferredInstallPrompt=null;
+window.addEventListener("beforeinstallprompt",event=>{
+ event.preventDefault();deferredInstallPrompt=event;
+ const b=$("installButton");if(b){b.textContent="تثبيت SYNEX الآن";$("installStatus").textContent="جهازك يدعم التثبيت المباشر."}
+});
+window.addEventListener("appinstalled",()=>{
+ deferredInstallPrompt=null;$("installStatus").textContent="تم تثبيت SYNEX بنجاح.";
+ $("installButton").textContent="تم التثبيت";$("installButton").disabled=true;
+});
+function isAppleMobile(){return /iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1)}
+$("installNav").addEventListener("click",()=>{$("installApp").scrollIntoView({behavior:"smooth",block:"start"})});
+$("installButton").addEventListener("click",async()=>{
+ if(deferredInstallPrompt){
+  deferredInstallPrompt.prompt();
+  const choice=await deferredInstallPrompt.userChoice;
+  $("installStatus").textContent=choice&&choice.outcome==="accepted"?"جارٍ تثبيت SYNEX...":"يمكنك تثبيته لاحقاً من قائمة المتصفح.";
+  deferredInstallPrompt=null;return;
+ }
+ if(isAppleMobile()){
+  $("installStatus").textContent="على iPhone/iPad: افتح الموقع في Safari ثم مشاركة ← إضافة إلى الشاشة الرئيسية.";
+ }else if(window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches){
+  $("installStatus").textContent="SYNEX مثبت ويعمل كتطبيق بالفعل.";
+ }else{
+  $("installStatus").textContent="إذا لم يظهر زر التثبيت: افتح قائمة Chrome أو Edge وابحث عن «تثبيت SYNEX» أو «إنشاء اختصار».";
+ }
+});
+
 if("serviceWorker"in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
 const launchParams=new URLSearchParams(location.search);if(launchParams.has("quickdrop"))openTool("quickdrop");else if(launchParams.get("tool")==="voicetype")openTool("voicetype");
 })();
