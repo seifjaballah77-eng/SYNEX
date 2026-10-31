@@ -90,8 +90,8 @@ setTimeout(()=>URL.revokeObjectURL(url),120000);
 $("sideHome").addEventListener("click",showHome);$("sideHelp").addEventListener("click",showHelp);$("sideHistory").addEventListener("click",showGlobalHistory);
 function renderQuickDrop(){
 const params=new URLSearchParams(location.search),target=params.get("quickdrop")||"";
-$("toolContent").innerHTML='<div class="tool-workspace"><span class="section-kicker">SYNEX QUICKDROP / PEER-TO-PEER</span><h2>نقل الملفات بين الأجهزة</h2><p>اختر الملفات وأنشئ رابطاً. افتح الرابط في الجهاز الآخر ليبدأ النقل تلقائياً، ثم نزّل ملفاً أو كل الملفات دفعة واحدة.</p><div class="compress-panel qd-panel"><div class="qd-status" id="qdStatus"><i></i><span>جاهز</span></div><div class="qd-tabs"><button class="mode-btn active" id="qdSendTab">إرسال ملفات</button><button class="mode-btn" id="qdReceiveTab">استقبال ملفات</button></div><section id="qdSendPane"><label class="file-drop" for="qdFiles"><span class="drop-symbol">⇧</span><strong>اختر الصور أو الملفات</strong><small>يمكنك اختيار عدة ملفات معاً</small></label><input id="qdFiles" type="file" multiple class="hidden"><div id="qdFileList" class="qd-file-list"></div><button class="primary-btn action-wide" id="qdCreate" disabled>إنشاء رابط المشاركة</button><div id="qdShare" class="qd-share hidden"><b>أرسل هذا الرابط إلى الجهاز الآخر</b><input id="qdLink" readonly><div class="qr-actions"><button class="ghost-btn" id="qdCopy">نسخ الرابط</button><button class="ghost-btn" id="qdNew">رابط جديد</button></div><div id="qdQr" class="qd-qr"></div><p class="compression-note">عندما يفتح المستلم الرابط يبدأ الاتصال والإرسال تلقائياً، دون طلب قبول.</p></div></section><section id="qdReceivePane" class="hidden"><div class="qd-receiver"><b>جارٍ الاتصال واستقبال الملفات</b><input id="qdPeerId" placeholder="معرّف المرسل" autocomplete="off"><button class="primary-btn action-wide" id="qdConnect">اتصال يدوي</button><p class="compression-note">إذا فتحت رابط المشاركة، سيبدأ الاتصال تلقائياً. اترك الصفحة مفتوحة حتى يكتمل النقل.</p></div><div class="qd-results hidden" id="qdResults"><div class="qd-results-head"><div><b>الملفات المستلمة</b><small id="qdReceivedCount">0 ملفات</small></div><button class="primary-btn qd-download-all" id="qdDownloadAll" disabled>تنزيل الكل</button></div><div id="qdDownloads" class="qd-downloads"></div></div></section><div class="progress-wrap hidden" id="qdProgress"><div class="progress-track"><span id="qdProgressBar"></span></div><small id="qdProgressText">جارٍ النقل...</small></div><p class="compression-note">النقل مباشر بين الجهازين عبر WebRTC. يجب إبقاء الصفحتين مفتوحتين، وقد لا تعمل بعض الشبكات المقيدة دون TURN.</p></div></div>';
-let files=[],peer=null,conn=null,role="send",ackWaiter=null,receiveFile=null,receivedUrls=[],receivedFiles=[];
+$("toolContent").innerHTML='<div class="tool-workspace"><span class="section-kicker">SYNEX QUICKDROP / PEER-TO-PEER</span><h2>نقل الملفات بين الأجهزة</h2><p>اختر الملفات وأنشئ رابطاً. افتح الرابط في الجهاز الآخر ليبدأ النقل تلقائياً، ثم نزّل ملفاً أو كل الملفات دفعة واحدة.</p><div class="compress-panel qd-panel"><div class="qd-status" id="qdStatus"><i></i><span>جاهز</span></div><div class="qd-tabs"><button class="mode-btn active" id="qdSendTab">إرسال ملفات</button><button class="mode-btn" id="qdReceiveTab">استقبال ملفات</button></div><section id="qdSendPane"><label class="file-drop" for="qdFiles"><span class="drop-symbol">⇧</span><strong>اختر الصور أو الملفات</strong><small>يمكنك اختيار عدة ملفات معاً</small></label><input id="qdFiles" type="file" multiple class="hidden"><div id="qdFileList" class="qd-file-list"></div><button class="primary-btn action-wide" id="qdCreate" disabled>إنشاء رابط المشاركة</button><div id="qdShare" class="qd-share hidden"><b>أرسل هذا الرابط إلى الجهاز الآخر</b><input id="qdLink" readonly><div class="qr-actions"><button class="ghost-btn" id="qdCopy">نسخ الرابط</button><button class="ghost-btn" id="qdNew">رابط جديد</button></div><div id="qdQr" class="qd-qr"></div><p class="compression-note">عندما يفتح المستلم الرابط يبدأ الاتصال والإرسال تلقائياً، دون طلب قبول.</p></div></section><section id="qdReceivePane" class="hidden"><div class="qd-receiver"><b>استقبال الملفات الكبيرة مباشرة إلى القرص</b><button class="ghost-btn action-wide" id="qdChooseFolder">اختيار مجلد الحفظ</button><small id="qdFolderStatus" class="compression-note">اختر مجلد الحفظ أولاً لتجنب تحميل الملفات الكبيرة كاملة في الذاكرة.</small><input id="qdPeerId" placeholder="معرّف المرسل" autocomplete="off"><button class="primary-btn action-wide" id="qdConnect">اتصال بالمرسل</button><p class="compression-note">اترك الصفحة مفتوحة أثناء النقل. اختيار المجلد يتيح كتابة أجزاء الملف مباشرة على القرص بدلاً من تجميع 5GB في الذاكرة.</p></div><div class="qd-results hidden" id="qdResults"><div class="qd-results-head"><div><b>الملفات المستلمة</b><small id="qdReceivedCount">0 ملفات</small></div><button class="primary-btn qd-download-all" id="qdDownloadAll" disabled>تنزيل الكل</button></div><div id="qdDownloads" class="qd-downloads"></div></div></section><div class="progress-wrap hidden" id="qdProgress"><div class="progress-track"><span id="qdProgressBar"></span></div><small id="qdProgressText">جارٍ النقل...</small></div><p class="compression-note">النقل مباشر بين الجهازين عبر WebRTC. أرسل البيانات على دفعات صغيرة مع تأكيد كل مجموعة. لا تغلق الصفحتين أو الجهازين أثناء النقل؛ اختيار مجلد الحفظ يسمح باستقبال ملفات متعددة الجيجابايت دون تجميعها في الذاكرة.</p></div></div>';
+let files=[],peer=null,conn=null,role="send",ackWaiter=null,receiveFile=null,receivedUrls=[],receivedFiles=[],saveDirectory=null;
 const status=(message,kind="")=>{const el=$("qdStatus");el.className="qd-status "+kind;el.querySelector("span").textContent=message};
 const setProgress=(n,label)=>{$("qdProgress").classList.remove("hidden");$("qdProgressBar").style.width=Math.max(0,Math.min(100,n))+"%";$("qdProgressText").textContent=label};
 const cleanup=()=>{if(conn){try{conn.close()}catch(_){}}if(peer){try{peer.destroy()}catch(_){}}conn=null;peer=null;ackWaiter=null};
@@ -101,12 +101,12 @@ conn=c;
 c.on("data",data=>{
 const msg=parseData(data);
 if(msg&&msg.type==="ack"&&ackWaiter){const w=ackWaiter;ackWaiter=null;w(msg);}
-else if(role==="receive")receiveData(data);
+else if(role==="receive")receiveData(data).catch(e=>{status("تعذر حفظ الملف: "+(e.message||"خطأ في التخزين"),"error");try{sendMessage({type:"error",message:e.message||"تعذر الحفظ"})}catch(_){}});
 });
 c.on("close",()=>status("انقطع الاتصال","error"));
 c.on("error",e=>status("خطأ في الاتصال: "+(e.message||"تعذر الاتصال"),"error"));
 }
-function waitAck(label){return new Promise((resolve,reject)=>{const timer=setTimeout(()=>{if(ackWaiter===done)ackWaiter=null;reject(new Error("انتهت مهلة انتظار تأكيد الطرف الآخر"))},30000);function done(msg){clearTimeout(timer);if(msg.label!==label)reject(new Error("تأكيد غير متوقع"));else resolve(msg)}ackWaiter=done})}
+function waitAck(label){return new Promise((resolve,reject)=>{const timer=setTimeout(()=>{if(ackWaiter===done)ackWaiter=null;reject(new Error("انتهت مهلة انتظار تأكيد الطرف الآخر؛ تحقق من الاتصال ثم أعد المحاولة"))},120000);function done(msg){clearTimeout(timer);if(msg.label!==label)reject(new Error("تأكيد غير متوقع"));else resolve(msg)}ackWaiter=done})}
 function sendMessage(obj){if(!conn||!conn.open)throw new Error("الاتصال غير جاهز");conn.send(JSON.stringify(obj))}
 async function sendAll(){
 try{
@@ -114,10 +114,13 @@ status("متصل — جارٍ إرسال الملفات","working");$("qdProgres
 let total=files.reduce((n,f)=>n+f.size,0),sent=0;
 for(let fi=0;fi<files.length;fi++){
 const file=files[fi],fileAck=waitAck("file");sendMessage({type:"file",name:file.name,size:file.size,mime:file.type||"application/octet-stream",index:fi,count:files.length});await fileAck;
-const chunkSize=48*1024;
-for(let offset=0,part=0;offset<file.size;offset+=chunkSize,part++){
-const buffer=await file.slice(offset,Math.min(offset+chunkSize,file.size)).arrayBuffer(),ack=waitAck("chunk:"+part);conn.send(buffer);await ack;
-sent+=buffer.byteLength;setProgress(total?sent/total*100:100,"إرسال "+file.name+" — "+Math.round(total?sent/total*100:100)+"%");
+const chunkSize=48*1024,batchSize=8;
+for(let offset=0,part=0;offset<file.size;part+=batchSize){
+const batchAck=waitAck("batch:"+fi+":"+Math.floor(part/batchSize));
+for(let n=0;n<batchSize&&offset<file.size;n++,part++){
+const buffer=await file.slice(offset,Math.min(offset+chunkSize,file.size)).arrayBuffer();conn.send(buffer);offset+=buffer.byteLength;sent+=buffer.byteLength;
+}
+await batchAck;setProgress(total?sent/total*100:100,"إرسال "+file.name+" — "+Math.round(total?sent/total*100:100)+"%");
 }
 const endAck=waitAck("end:"+fi);sendMessage({type:"end",index:fi});await endAck;
 }
@@ -137,16 +140,27 @@ link.href=url;link.download=f.name;link.className="qd-single-download";link.text
 row.append(info,link);$("qdDownloads").append(row);
 $("qdReceivedCount").textContent=receivedFiles.length+" ملف";$("qdDownloadAll").disabled=false;
 }
-function receiveData(data){
+async function receiveData(data){
 if(typeof data==="string"){
 const m=parseData(data);if(!m)return;
 if(m.type==="ready"){status("تم الاتصال — بانتظار الملفات","success");$("qdConnect").disabled=true;return}
-if(m.type==="file"){receiveFile={name:m.name,size:m.size,mime:m.mime||"application/octet-stream",chunks:[],received:0,index:m.index};const ack=waitAck;sendMessage({type:"ack",label:"file"});status("استقبال "+m.name,"working");setProgress(0,"استقبال "+m.name);return}
-if(m.type==="end"&&receiveFile){const f=receiveFile,blob=new Blob(f.chunks,{type:f.mime});addReceivedFile(f,blob);receiveFile=null;sendMessage({type:"ack",label:"end:"+m.index});status("استُلم "+f.name,"success");return}
-if(m.type==="complete"){status("اكتمل استقبال جميع الملفات","success");setProgress(100,"اكتمل استقبال "+receivedFiles.length+" ملف");recordActivity(receivedFiles.length+" ملف","QuickDrop");return}
+if(m.type==="error"){status(m.message||"أوقف المرسل النقل","error");return}
+if(m.type==="file"){
+const safeName=String(m.name||"SYNEX-file").split(/[\\/]/).pop().replace(/[<>:"|?*\\x00-\\x1f]/g,"_");
+receiveFile={name:safeName,size:m.size,mime:m.mime||"application/octet-stream",chunks:[],received:0,index:m.index,chunkCount:0,writer:null,streamed:false};
+if(saveDirectory){const handle=await saveDirectory.getFileHandle(safeName,{create:true});receiveFile.writer=await handle.createWritable();receiveFile.streamed=true}
+else if(m.size>1024*1024*1024){receiveFile=null;sendMessage({type:"error",message:"هذا الملف أكبر من 1GB. اختر مجلد حفظ أولاً لاستقباله مباشرة على القرص."});throw new Error("اختر مجلد حفظ لاستقبال الملفات الأكبر من 1GB")}
+sendMessage({type:"ack",label:"file"});status("استقبال "+safeName,"working");setProgress(0,"استقبال "+safeName+" — 0%");return
+}
+if(m.type==="end"&&receiveFile){const f=receiveFile;if(f.writer)await f.writer.close();else addReceivedFile(f,new Blob(f.chunks,{type:f.mime}));receiveFile=null;sendMessage({type:"ack",label:"end:"+m.index});status("استُلم "+f.name+" وحُفظ"+(f.streamed?" في المجلد المختار":""),"success");return}
+if(m.type==="complete"){status("اكتمل استقبال جميع الملفات","success");setProgress(100,"اكتمل استقبال الملفات");recordActivity("اكتمل استقبال الملفات","QuickDrop");return}
 }
 if(data instanceof ArrayBuffer||ArrayBuffer.isView(data)){
-if(!receiveFile)return;const chunk=data instanceof ArrayBuffer?data:data.buffer.slice(data.byteOffset,data.byteOffset+data.byteLength);receiveFile.chunks.push(chunk);receiveFile.received+=chunk.byteLength;setProgress(receiveFile.size?receiveFile.received/receiveFile.size*100:100,"استقبال "+receiveFile.name+" — "+formatBytes(receiveFile.received)+" / "+formatBytes(receiveFile.size));sendMessage({type:"ack",label:"chunk:"+Math.floor((receiveFile.received-1)/(48*1024))});
+if(!receiveFile)return;const chunk=data instanceof ArrayBuffer?data:data.buffer.slice(data.byteOffset,data.byteOffset+data.byteLength);
+if(receiveFile.writer)await receiveFile.writer.write(chunk);else receiveFile.chunks.push(chunk);
+receiveFile.received+=chunk.byteLength;receiveFile.chunkCount++;
+setProgress(receiveFile.size?receiveFile.received/receiveFile.size*100:100,"استقبال "+receiveFile.name+" — "+formatBytes(receiveFile.received)+" / "+formatBytes(receiveFile.size));
+if(receiveFile.chunkCount%8===0||receiveFile.received===receiveFile.size)sendMessage({type:"ack",label:"batch:"+receiveFile.index+":"+Math.floor((receiveFile.chunkCount-1)/8)});
 }
 }
 function initPeer(){
@@ -155,6 +169,7 @@ try{peer=new Peer();peer.on("error",e=>status("تعذر إنشاء الاتصا�
 }
 function setTab(which){role=which;$("qdSendPane").classList.toggle("hidden",which!=="send");$("qdReceivePane").classList.toggle("hidden",which!=="receive");$("qdSendTab").classList.toggle("active",which==="send");$("qdReceiveTab").classList.toggle("active",which==="receive")}
 $("qdSendTab").onclick=()=>setTab("send");$("qdReceiveTab").onclick=()=>setTab("receive");
+$("qdChooseFolder").onclick=async()=>{try{if(!window.showDirectoryPicker){toast("اختيار مجلد مباشر غير مدعوم في هذا المتصفح؛ الملفات حتى 1GB فقط في وضع الذاكرة.");return}saveDirectory=await window.showDirectoryPicker({mode:"readwrite"});$("qdFolderStatus").textContent="تم اختيار مجلد الحفظ. يمكنك الآن الاتصال واستقبال ملفات كبيرة.";status("مجلد الحفظ جاهز","success")}catch(e){if(e.name!=="AbortError")toast("تعذر اختيار المجلد: "+(e.message||"خطأ"))}};
 $("qdFiles").onchange=()=>{files=Array.from($("qdFiles").files||[]);$("qdFileList").innerHTML="";files.forEach(f=>{const row=document.createElement("div");row.className="qd-file";const n=document.createElement("span"),s=document.createElement("small");n.textContent=f.name;s.textContent=formatBytes(f.size);row.append(n,s);$("qdFileList").append(row)});$("qdCreate").disabled=!files.length};
 $("qdCreate").onclick=()=>{
 if(!files.length)return;cleanup();const p=initPeer();if(!p)return;$("qdCreate").disabled=true;status("جارٍ إنشاء رابط المشاركة...");
@@ -165,6 +180,7 @@ $("qdCopy").onclick=async()=>{try{await navigator.clipboard.writeText($("qdLink"
 $("qdNew").onclick=()=>{cleanup();$("qdShare").classList.add("hidden");$("qdCreate").disabled=!files.length;status("جاهز لإنشاء رابط جديد")};
 function connectToSender(id){
 if(!id){toast("افتح رابط المشاركة أو أدخل معرّف المرسل");return}
+if(!saveDirectory&&window.showDirectoryPicker){toast("اختر مجلد الحفظ أولاً لاستقبال الملفات الكبيرة.");return}
 cleanup();const p=initPeer();if(!p)return;$("qdConnect").disabled=true;status("جارٍ الاتصال بالمرسل...");
 p.on("open",()=>{const c=p.connect(id,{reliable:true});bindConnection(c);c.on("open",()=>status("تم الاتصال — جارٍ انتظار الملفات","working"));c.on("error",e=>{status("تعذر الاتصال: "+(e.message||"خطأ"),"error");$("qdConnect").disabled=false})});
 }
@@ -175,7 +191,7 @@ if(receivedFiles.length===1){const f=receivedFiles[0],a=document.createElement("
 if(!window.fflate||!window.fflate.zipSync){toast("تعذر إنشاء ZIP؛ نزّل الملفات واحداً واحداً");return}
 try{const entries={};for(const f of receivedFiles){const bytes=new Uint8Array(await f.blob.arrayBuffer());entries[f.name]=bytes}const zipped=window.fflate.zipSync(entries,{level:0}),blob=new Blob([zipped],{type:"application/zip"}),url=URL.createObjectURL(blob);receivedUrls.push(url);const a=document.createElement("a");a.href=url;a.download="SYNEX-files.zip";a.click();}catch(e){toast("تعذر تجهيز الملفات للتنزيل")}
 };
-if(target){setTab("receive");$("qdPeerId").value=target;status("تم فتح رابط المشاركة — جارٍ الاتصال تلقائياً","working");connectToSender(target)}
+if(target){setTab("receive");$("qdPeerId").value=target;status("تم فتح رابط المشاركة — اختر مجلد الحفظ ثم اضغط اتصال","working")}
 window.addEventListener("beforeunload",()=>{receivedUrls.forEach(URL.revokeObjectURL);cleanup()},{once:true});
 }
 function renderScreenText(){
