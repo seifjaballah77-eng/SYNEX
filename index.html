@@ -7,6 +7,7 @@
   <meta name="description" content="SYNEX — أدواتك الذكية في مكان واحد">
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./icon.svg">
   <link rel="stylesheet" href="./styles.css">
   <title>SYNEX — أدواتك في مكان واحد</title>
 </head>
@@ -16,6 +17,7 @@
     <a class="brand" href="./" aria-label="SYNEX home"><span class="brand-mark">S</span><span>SYNEX</span></a>
     <div class="top-actions">
       <button class="icon-btn" id="themeToggle" aria-label="تبديل المظهر" title="تبديل المظهر">◐</button>
+      <button class="install-nav" id="installNav" type="button"><span aria-hidden="true">⬇</span> تنزيل التطبيق</button>
       <button class="login-btn" id="openLogin">دخول Google</button>
       <button class="avatar-btn hidden" id="accountButton" aria-label="الحساب">S</button>
     </div>
@@ -82,6 +84,22 @@
       </div>
     </section>
 
+    <section class="install-section" id="installApp">
+      <div class="install-panel">
+        <div class="install-icon" aria-hidden="true">⬇</div>
+        <div class="install-copy"><span class="section-kicker">SYNEX APP</span><h2>نزّل SYNEX على أجهزتك</h2>
+          <p>ثبّت SYNEX على الشاشة الرئيسية أو الكمبيوتر لفتحه كتطبيق مستقل. نفس الموقع يعمل على الهاتف والكمبيوتر.</p>
+          <button class="primary-btn" id="installButton" type="button">تثبيت التطبيق</button>
+          <p class="install-status" id="installStatus" aria-live="polite">اختر طريقة التثبيت المناسبة لجهازك أدناه.</p>
+        </div>
+      </div>
+      <div class="install-guides">
+        <article><b>Android</b><p>افتح الموقع في Chrome، ثم اضغط «تثبيت التطبيق» أو من القائمة ⋮ اختر «تثبيت التطبيق» أو «إضافة إلى الشاشة الرئيسية».</p></article>
+        <article><b>iPhone وiPad</b><p>افتح الموقع في Safari، اضغط زر المشاركة، ثم «إضافة إلى الشاشة الرئيسية» وبعدها «إضافة».</p></article>
+        <article><b>Windows وMac وLinux</b><p>في Chrome أو Edge افتح الموقع، ثم استخدم زر التثبيت بجانب شريط العنوان إن ظهر. وإلا افتح القائمة واختر «تثبيت SYNEX» أو «إنشاء اختصار».</p></article>
+      </div>
+      <p class="install-note">ملاحظة: هذا تثبيت للموقع كتطبيق ويب (PWA)، وليس ملف APK أو EXE منفصلاً. يلزم اتصال بالإنترنت لتحميل الأدوات والمكتبات الخارجية.</p>
+    </section>
     <section class="workspace hidden" id="workspace" aria-live="polite">
       <button class="back-btn" id="backHome">→ العودة للرئيسية</button>
       <div id="toolContent"></div>
