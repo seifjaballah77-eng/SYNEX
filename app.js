@@ -100,13 +100,13 @@ function bindConnection(c){
 conn=c;
 c.on("data",data=>{
 const msg=parseData(data);
-if(msg&&msg.type==="ack"&&ackWaiter){const w=ackWaiter;ackWaiter=null;w(msg);}
+if(msg&&(msg.type==="ack"||msg.type==="error")&&ackWaiter){const w=ackWaiter;ackWaiter=null;w(msg);}
 else if(role==="receive")receiveData(data).catch(e=>{status("تعذر حفظ الملف: "+(e.message||"خطأ في التخزين"),"error");try{sendMessage({type:"error",message:e.message||"تعذر الحفظ"})}catch(_){}});
 });
 c.on("close",()=>status("انقطع الاتصال","error"));
 c.on("error",e=>status("خطأ في الاتصال: "+(e.message||"تعذر الاتصال"),"error"));
 }
-function waitAck(label){return new Promise((resolve,reject)=>{const timer=setTimeout(()=>{if(ackWaiter===done)ackWaiter=null;reject(new Error("انتهت مهلة انتظار تأكيد الطرف الآخر؛ تحقق من الاتصال ثم أعد المحاولة"))},120000);function done(msg){clearTimeout(timer);if(msg.label!==label)reject(new Error("تأكيد غير متوقع"));else resolve(msg)}ackWaiter=done})}
+function waitAck(label){return new Promise((resolve,reject)=>{const timer=setTimeout(()=>{if(ackWaiter===done)ackWaiter=null;reject(new Error("انتهت مهلة انتظار تأكيد الطرف الآخر؛ تحقق من الاتصال ثم أعد المحاولة"))},120000);function done(msg){clearTimeout(timer);if(msg&&msg.type==="error")reject(new Error(msg.message||"رفض الطرف الآخر متابعة النقل"));else if(msg.label!==label)reject(new Error("تأكيد غير متوقع"));else resolve(msg)}ackWaiter=done})}
 function sendMessage(obj){if(!conn||!conn.open)throw new Error("الاتصال غير جاهز");conn.send(JSON.stringify(obj))}
 async function sendAll(){
 try{
@@ -115,16 +115,16 @@ let total=files.reduce((n,f)=>n+f.size,0),sent=0;
 for(let fi=0;fi<files.length;fi++){
 const file=files[fi],fileAck=waitAck("file");sendMessage({type:"file",name:file.name,size:file.size,mime:file.type||"application/octet-stream",index:fi,count:files.length});await fileAck;
 const chunkSize=48*1024,batchSize=8;
-for(let offset=0,part=0;offset<file.size;part+=batchSize){
-const batchAck=waitAck("batch:"+fi+":"+Math.floor(part/batchSize));
-for(let n=0;n<batchSize&&offset<file.size;n++,part++){
+for(let offset=0,batch=0;offset<file.size;batch++){
+const batchAck=waitAck("batch:"+fi+":"+batch);
+for(let n=0;n<batchSize&&offset<file.size;n++){
 const buffer=await file.slice(offset,Math.min(offset+chunkSize,file.size)).arrayBuffer();conn.send(buffer);offset+=buffer.byteLength;sent+=buffer.byteLength;
 }
 await batchAck;setProgress(total?sent/total*100:100,"إرسال "+file.name+" — "+Math.round(total?sent/total*100:100)+"%");
 }
 const endAck=waitAck("end:"+fi);sendMessage({type:"end",index:fi});await endAck;
 }
-sendMessage({type:"complete",count:files.length});status("اكتمل الإرسال","success");setProgress(100,"تم إرسال "+files.length+" ملف");await Promise.all(files.map(f=>saveActivityFile(f.name,"QuickDrop sent",f.name,f).catch(()=>null)));recordActivity(files.length+" ملف","QuickDrop sent");
+sendMessage({type:"complete",count:files.length});status("اكتمل الإرسال","success");setProgress(100,"تم إرسال "+files.length+" ملف");await Promise.all(files.filter(f=>f.size<=50*1024*1024).map(f=>saveActivityFile(f.name,"QuickDrop sent",f.name,f).catch(()=>null)));recordActivity(files.length+" ملف","QuickDrop sent");
 }catch(e){status(e.message||"تعذر إكمال النقل","error");toast(e.message||"تعذر إكمال النقل")}
 }
 function addReceivedFile(f,blob){
