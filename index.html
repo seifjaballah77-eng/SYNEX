@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#090b18">
+  <meta name="description" content="SYNEX — أدواتك الذكية في مكان واحد">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./styles.css">
+  <title>SYNEX — أدواتك في مكان واحد</title>
+</head>
+<body>
+  <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+  <header class="topbar">
+    <a class="brand" href="./" aria-label="SYNEX home"><span class="brand-mark">S</span><span>SYNEX</span></a>
+    <div class="top-actions">
+      <button class="icon-btn" id="themeToggle" aria-label="تبديل المظهر" title="تبديل المظهر">◐</button>
+      <button class="login-btn" id="openLogin">دخول Google</button>
+      <button class="avatar-btn hidden" id="accountButton" aria-label="الحساب">S</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="eyebrow"><span class="pulse-dot"></span> مساحة عملك الرقمية</div>
+      <h1>كل أدواتك، <span class="neon-text">بمكان واحد.</span></h1>
+      <p>انقل ملفاتك، استخرج النصوص، وحوّل صوتك إلى كتابة — ببساطة.</p>
+      <div class="hero-actions">
+        <button class="primary-btn" id="startNow">ابدأ الآن <span>←</span></button>
+        <button class="ghost-btn" id="guestSkip">تخطي التسجيل</button>
+      </div>
+      <p class="guest-note hidden" id="guestWarning">لن تُحفظ ملفاتك ومعلوماتك إذا لم تسجل الدخول.</p>
+    </section>
+
+    <section class="tools-section" id="tools">
+      <div class="section-heading"><div><span class="section-kicker">WORKSPACE</span><h2>اختر أداتك</h2></div><span class="section-hint">3 أدوات • واجهة واحدة</span></div>
+      <div class="tool-grid">
+        <button class="tool-card quickdrop" data-tool="quickdrop">
+          <span class="tool-icon">⇧</span><span class="tool-tag">SHARE</span>
+          <strong>QuickDrop</strong><span class="tool-desc">نقل الملفات بين الهاتف والكمبيوتر بالجودة الأصلية.</span><span class="tool-link">فتح الأداة <b>←</b></span>
+        </button>
+        <button class="tool-card screentext" data-tool="screentext">
+          <span class="tool-icon">▧</span><span class="tool-tag">OCR & DESIGN</span>
+          <strong>ScreenText</strong><span class="tool-desc">استخرج النص من الصور وصمّم نصوصك بسهولة.</span><span class="tool-link">فتح الأداة <b>←</b></span>
+        </button>
+        <button class="tool-card voicetype" data-tool="voicetype">
+          <span class="tool-icon">♫</span><span class="tool-tag">VOICE</span>
+          <strong>VoiceType</strong><span class="tool-desc">حوّل الكلام والتسجيلات الصوتية إلى نص.</span><span class="tool-link">فتح الأداة <b>←</b></span>
+        </button>
+      </div>
+    </section>
+
+    <section class="workspace hidden" id="workspace" aria-live="polite">
+      <button class="back-btn" id="backHome">→ العودة للرئيسية</button>
+      <div id="toolContent"></div>
+    </section>
+  </main>
+
+  <footer><span>SYNEX</span><span>Created by Seif</span><span>خفيف • واضح • سريع</span></footer>
+
+  <dialog id="loginDialog" class="dialog">
+    <form method="dialog" class="dialog-card">
+      <button class="dialog-close" aria-label="إغلاق">×</button>
+      <div class="brand-mark large">S</div>
+      <span class="section-kicker">WELCOME TO SYNEX</span>
+      <h2>احفظ عملك معك</h2>
+      <p>سجّل الدخول بحساب Google لمزامنة معلوماتك بين أجهزتك.</p>
+      <button class="google-btn" id="googleSignIn" type="button"><span class="google-g">G</span> المتابعة باستخدام Google</button>
+      <p class="dialog-foot">يمكنك المتابعة كزائر، لكن لن تُحفظ ملفاتك ومعلوماتك.</p>
+      <p class="config-hint hidden" id="authHint">يلزم إعداد خدمة تسجيل الدخول قبل تفعيل Google.</p>
+    </form>
+  </dialog>
+  <div class="toast" id="toast" role="status"></div>
+  <script src="./config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
