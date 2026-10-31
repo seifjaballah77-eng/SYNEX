@@ -229,9 +229,9 @@ body.light .vs-fields input:not([type=color]):not([type=range]),body.light .vs-f
 }
 
 /* SYNEX install section */
-.install-nav{border:1px solid #38e8ff66;border-radius:11px;padding:10px 14px;background:#38e8ff12;color:var(--cyan);font-size:12px;font-weight:800;white-space:nowrap}
+.install-nav{display:inline-flex;align-items:center;gap:6px;border:1px solid #38e8ff66;border-radius:10px;padding:7px 10px;background:#38e8ff12;color:var(--cyan);font-size:11px;font-weight:800;white-space:nowrap;line-height:1.2}
 .install-nav:hover{background:#38e8ff22;box-shadow:0 0 18px #38e8ff30}
-.install-section{padding:10px 0 70px;scroll-margin-top:90px}
+.install-section{padding:10px 0 70px;scroll-margin-top:100px}
 .install-panel{display:flex;align-items:center;gap:22px;padding:clamp(20px,4vw,34px);border:1px solid #38e8ff55;border-radius:22px;background:linear-gradient(120deg,#102b3cdd,#17182f 70%,#202044);box-shadow:0 12px 38px #38e8ff10}
 .install-icon{width:76px;height:76px;flex:0 0 76px;border-radius:22px;display:grid;place-items:center;font-size:38px;color:var(--cyan);background:#38e8ff18;border:1px solid #38e8ff70;box-shadow:0 0 24px #38e8ff25}
 .install-copy h2{margin:8px 0;font-size:clamp(20px,3vw,27px)}
