@@ -28,7 +28,7 @@ document.querySelectorAll(".side-tool").forEach(btn=>btn.addEventListener("click
 function showHome(){$("workspace").classList.add("hidden");$("tools").classList.remove("hidden");document.querySelector(".hero").classList.remove("hidden");document.querySelectorAll(".side-tool").forEach(b=>b.classList.remove("active"));window.scrollTo({top:0,behavior:"smooth"})}
 function showHelp(){
 $("tools").classList.add("hidden");document.querySelector(".hero").classList.add("hidden");$("workspace").classList.remove("hidden");
-$("toolContent").innerHTML='<div class="tool-workspace"><span class="section-kicker">SYNEX GUIDE</span><h2>مركز المساعدة</h2><div class="help-grid"><article><b>File Lab</b><p>ضغط GZIP لملف واحد أو ZIP لعدة ملفات ومجلدات. اختر الصور لمعاينتها وتصديرها بصيغ مختلفة.</p></article><article><b>QR Generator</b><p>أنشئ رمز QR من رابط أو نص ثم نزّله كصورة PNG.</p></article><article><b>QR Reader</b><p>ارفع صورة QR لقراءة محتواها ونسخه أو فتح الرابط.</p></article><article><b>ScreenText</b><p>استخرج النص من صورة باستخدام OCR داخل المتصفح، ثم انسخه أو نزّله TXT.</p></article><article><b>VoiceType</b><p>حوّل الكلام المباشر إلى نص باستخدام خدمة التعرف على الكلام في المتصفح؛ يتطلب متصفحاً يدعمها وميكروفوناً.</p></article><article><b>QuickDrop</b><p>نقل الملفات بين جهازين يحتاج خادم اتصال وإشارة WebRTC؛ هذه الوظيفة لم تُفعّل بعد ولا ندّعي أن النقل يعمل.</p></article><article><b>السجل والخصوصية</b><p>السجل الحالي محفوظ محلياً على هذا الجهاز. الزائر يحتفظ به 48 ساعة، والمستخدم المسجل 120 يوماً محلياً. المزامنة السحابية بين الأجهزة تحتاج إعداد قاعدة بيانات وتخزين.</p></article><article><b>تسجيل الدخول</b><p>يتطلب إعداد مفاتيح Supabase وتفعيل Google OAuth. بيانات الاتصال غير مضبوطة في نسخة الإعداد الحالية.</p></article></div></div>';
+$("toolContent").innerHTML='<div class="tool-workspace"><span class="section-kicker">SYNEX GUIDE</span><h2>مركز المساعدة</h2><div class="help-grid"><article><b>File Lab</b><p>ضغط GZIP لملف واحد أو ZIP لعدة ملفات ومجلدات. اختر الصور لمعاينتها وتصديرها بصيغ مختلفة.</p></article><article><b>QR Generator</b><p>أنشئ رمز QR من رابط أو نص ثم نزّله كصورة PNG.</p></article><article><b>QR Reader</b><p>ارفع صورة QR لقراءة محتواها ونسخه أو فتح الرابط.</p></article><article><b>ScreenText</b><p>استخرج النص من صورة باستخدام OCR داخل المتصفح، ثم انسخه أو نزّله TXT.</p></article><article><b>VoiceType</b><p>حوّل الكلام المباشر إلى نص باستخدام خدمة التعرف على الكلام في المتصفح؛ يتطلب متصفحاً يدعمها وميكروفوناً.</p></article><article><b>QuickDrop</b><p>شارك رابطاً أو QR لاستقبال ملفات مباشرة عبر PeerJS وWebRTC. يتطلب بقاء الصفحتين مفتوحتين، وقد تتعذر بعض الشبكات المقيدة.</p></article><article><b>السجل والخصوصية</b><p>السجل الحالي محفوظ محلياً على هذا الجهاز. الزائر يحتفظ به 48 ساعة، والمستخدم المسجل 120 يوماً محلياً. المزامنة السحابية بين الأجهزة تحتاج إعداد قاعدة بيانات وتخزين.</p></article><article><b>تسجيل الدخول</b><p>يتطلب إعداد مفاتيح Supabase وتفعيل Google OAuth. بيانات الاتصال غير مضبوطة في نسخة الإعداد الحالية.</p></article></div></div>';
 }
 function showGlobalHistory(){
 $("tools").classList.add("hidden");document.querySelector(".hero").classList.add("hidden");$("workspace").classList.remove("hidden");
@@ -40,7 +40,76 @@ items.forEach(x=>{const row=document.createElement("div");row.className="history
 function recordActivity(title,type){const key="synex-global-history";let list=[];try{list=JSON.parse(localStorage.getItem(key)||"[]")}catch(_){}list.unshift({title,type,date:new Date().toLocaleString(),ts:Date.now()});localStorage.setItem(key,JSON.stringify(list.slice(0,100)))}
 $("sideHome").addEventListener("click",showHome);$("sideHelp").addEventListener("click",showHelp);$("sideHistory").addEventListener("click",showGlobalHistory);
 function renderQuickDrop(){
-$("toolContent").innerHTML='<div class="tool-workspace"><span class="section-kicker">QUICKDROP</span><h2>نقل الملفات</h2><div class="compress-panel"><div class="placeholder-panel"><b>النقل المباشر بين الأجهزة غير مفعّل بعد</b><p>لإنجازه بشكل حقيقي نحتاج خدمة signaling واتصال WebRTC، وقد نحتاج TURN حتى يعمل عبر شبكات مختلفة. لن أعرض زر إرسال وهمياً قبل إعداد هذه الخدمة.</p></div></div></div>';
+const params=new URLSearchParams(location.search),target=params.get("quickdrop")||"";
+$("toolContent").innerHTML='<div class="tool-workspace"><span class="section-kicker">SYNEX QUICKDROP / PEER-TO-PEER</span><h2>نقل الملفات بين الأجهزة</h2><p>اختر الملفات على الجهاز المرسل، ثم شارك الرابط أو QR مع الجهاز الآخر. لا يحتاج المستلم إلى حساب.</p><div class="compress-panel qd-panel"><div class="qd-status" id="qdStatus"><i></i><span>جاهز للاتصال</span></div><div class="qd-tabs"><button class="mode-btn active" id="qdSendTab">إرسال ملفات</button><button class="mode-btn" id="qdReceiveTab">استقبال ملفات</button></div><section id="qdSendPane"><label class="file-drop" for="qdFiles"><span class="drop-symbol">⇧</span><strong>اختر الملفات التي تريد إرسالها</strong><small>يمكنك اختيار أكثر من ملف</small></label><input id="qdFiles" type="file" multiple class="hidden"><div id="qdFileList" class="qd-file-list"></div><button class="primary-btn action-wide" id="qdCreate" disabled>إنشاء رابط و QR</button><div id="qdShare" class="qd-share hidden"><b>شارك هذا الرابط مع المستلم</b><input id="qdLink" readonly><div class="qr-actions"><button class="ghost-btn" id="qdCopy">نسخ الرابط</button><button class="ghost-btn" id="qdNew">إنشاء رابط جديد</button></div><div id="qdQr" class="qd-qr"></div><div class="qd-request hidden" id="qdRequest"><b>هناك جهاز يريد الاتصال</b><p id="qdRequestText">وافق على الاتصال لبدء النقل.</p><button class="primary-btn action-wide" id="qdAccept">قبول الاتصال</button></div></div></section><section id="qdReceivePane" class="hidden"><div class="qd-receiver"><b>أدخل رابط المرسل أو افتح الرابط الذي وصلك</b><input id="qdPeerId" placeholder="معرّف المرسل" autocomplete="off"><button class="primary-btn action-wide" id="qdConnect">الاتصال بالمرسل</button><p class="compression-note">عند فتح رابط المشاركة، سيظهر معرّف المرسل هنا تلقائياً. لن يبدأ النقل إلا بعد قبول المرسل.</p></div><div id="qdDownloads" class="qd-downloads"></div></section><div class="progress-wrap hidden" id="qdProgress"><div class="progress-track"><span id="qdProgressBar"></span></div><small id="qdProgressText">جارٍ النقل...</small></div><p class="compression-note">النقل يتم مباشرة بين الجهازين عند توفر اتصال WebRTC. قد تحتاج بعض الشبكات إلى TURN، لذلك لا يمكن ضمان الاتصال على كل الشبكات. أبقِ صفحة SYNEX مفتوحة أثناء النقل.</p></div></div>';
+let files=[],peer=null,conn=null,role="send",accepted=false,ackWaiter=null,receiveFile=null,receivedUrls=[];
+const status=(message,kind="")=>{const el=$("qdStatus");el.className="qd-status "+kind;el.querySelector("span").textContent=message};
+const setProgress=(n,label)=>{$("qdProgress").classList.remove("hidden");$("qdProgressBar").style.width=Math.max(0,Math.min(100,n))+"%";$("qdProgressText").textContent=label};
+const cleanup=()=>{if(conn){try{conn.close()}catch(_){}}if(peer){try{peer.destroy()}catch(_){}}conn=null;peer=null;ackWaiter=null;accepted=false};
+const parseData=d=>{if(typeof d==="string"){try{return JSON.parse(d)}catch(_){return null}}return null};
+function bindConnection(c){
+conn=c;
+c.on("data",data=>{
+const msg=parseData(data);
+if(msg&&msg.type==="ack"&&ackWaiter){const w=ackWaiter;ackWaiter=null;w(msg);}
+else if(role==="receive")receiveData(data);
+});
+c.on("close",()=>status("انقطع الاتصال","error"));
+c.on("error",e=>status("خطأ في الاتصال: "+(e.message||"تعذر الاتصال"),"error"));
+}
+function waitAck(label){return new Promise((resolve,reject)=>{const timer=setTimeout(()=>{if(ackWaiter===done)ackWaiter=null;reject(new Error("انتهت مهلة انتظار تأكيد الطرف الآخر"))},30000);function done(msg){clearTimeout(timer);if(msg.label!==label)reject(new Error("تأكيد غير متوقع"));else resolve(msg)}ackWaiter=done})}
+function sendMessage(obj){if(!conn||!conn.open)throw new Error("الاتصال غير جاهز");conn.send(JSON.stringify(obj))}
+async function sendAll(){
+try{
+status("تم الاتصال — جارٍ إرسال الملفات","working");$("qdProgress").classList.remove("hidden");
+let total=files.reduce((n,f)=>n+f.size,0),sent=0;
+for(let fi=0;fi<files.length;fi++){
+const file=files[fi];sendMessage({type:"file",name:file.name,size:file.size,mime:file.type||"application/octet-stream",index:fi,count:files.length});
+await waitAck("file");
+const chunkSize=48*1024;
+for(let offset=0,part=0;offset<file.size;offset+=chunkSize,part++){
+const buffer=await file.slice(offset,Math.min(offset+chunkSize,file.size)).arrayBuffer();
+const ack=waitAck("chunk:"+part);conn.send(buffer);await ack;
+sent+=buffer.byteLength;setProgress(total?sent/total*100:100,"إرسال "+file.name+" — "+Math.round(total?sent/total*100:100)+"%");
+}
+sendMessage({type:"end",index:fi});await waitAck("end:"+fi);
+}
+status("اكتمل إرسال الملفات","success");setProgress(100,"اكتمل إرسال "+files.length+" ملف");recordActivity(files.length+" ملف","QuickDrop");
+}catch(e){status(e.message||"تعذر إكمال النقل","error");toast(e.message||"تعذر إكمال النقل")}
+}
+function receiveData(data){
+if(typeof data==="string"){
+const m=parseData(data);if(!m)return;
+if(m.type==="ready"){status("متصل بالمرسل — جاهز للاستقبال","success");$("qdConnect").disabled=true;return}
+if(m.type==="file"){receiveFile={name:m.name,size:m.size,mime:m.mime||"application/octet-stream",chunks:[],received:0,index:m.index};sendMessage({type:"ack",label:"file"});status("استقبال "+m.name,"working");setProgress(0,"استقبال "+m.name);return}
+if(m.type==="end"&&receiveFile){const f=receiveFile,blob=new Blob(f.chunks,{type:f.mime}),url=URL.createObjectURL(blob);receivedUrls.push(url);const row=document.createElement("div");row.className="qd-download";const info=document.createElement("div"),name=document.createElement("b"),size=document.createElement("small"),link=document.createElement("a");name.textContent=f.name;size.textContent=formatBytes(f.size);info.append(name,size);link.href=url;link.download=f.name;link.textContent="تنزيل";row.append(info,link);$("qdDownloads").append(row);receiveFile=null;sendMessage({type:"ack",label:"end:"+m.index});status("استُلم الملف — يمكنك تنزيله","success");return}
+}
+if(data instanceof ArrayBuffer||ArrayBuffer.isView(data)){
+if(!receiveFile)return;const chunk=data instanceof ArrayBuffer?data:data.buffer.slice(data.byteOffset,data.byteOffset+data.byteLength);receiveFile.chunks.push(chunk);receiveFile.received+=chunk.byteLength;setProgress(receiveFile.size?receiveFile.received/receiveFile.size*100:100,"استقبال "+receiveFile.name+" — "+formatBytes(receiveFile.received)+" / "+formatBytes(receiveFile.size));sendMessage({type:"ack",label:"chunk:"+Math.floor((receiveFile.received-1)/(48*1024))});
+}
+}
+function initPeer(){
+if(!window.Peer){status("تعذر تحميل PeerJS. تحقق من اتصال الإنترنت ثم أعد تحميل الصفحة.","error");return null}
+try{peer=new Peer();peer.on("error",e=>status("تعذر إنشاء الاتصال: "+(e.type||e.message||"خطأ PeerJS"),"error"));return peer}catch(e){status("تعذر بدء خدمة الاتصال","error");return null}
+}
+function setTab(which){role=which;$("qdSendPane").classList.toggle("hidden",which!=="send");$("qdReceivePane").classList.toggle("hidden",which!=="receive");$("qdSendTab").classList.toggle("active",which==="send");$("qdReceiveTab").classList.toggle("active",which==="receive")}
+$("qdSendTab").onclick=()=>setTab("send");$("qdReceiveTab").onclick=()=>setTab("receive");
+$("qdFiles").onchange=()=>{files=Array.from($("qdFiles").files||[]);$("qdFileList").innerHTML="";files.forEach(f=>{const row=document.createElement("div");row.className="qd-file";const n=document.createElement("span"),s=document.createElement("small");n.textContent=f.name;s.textContent=formatBytes(f.size);row.append(n,s);$("qdFileList").append(row)});$("qdCreate").disabled=!files.length};
+$("qdCreate").onclick=()=>{
+if(!files.length)return;cleanup();const p=initPeer();if(!p)return;$("qdCreate").disabled=true;status("جارٍ إنشاء رابط مشاركة...");
+p.on("open",id=>{const u=new URL(location.href);u.searchParams.set("quickdrop",id);$("qdLink").value=u.href;$("qdShare").classList.remove("hidden");$("qdQr").innerHTML="";if(window.QRCode)new QRCode($("qdQr"),{text:u.href,width:220,height:220});else $("qdQr").textContent="تعذر إنشاء QR؛ يمكنك نسخ الرابط.";status("الرابط جاهز — بانتظار اتصال المستلم","success");});
+p.on("connection",incoming=>{if(conn){incoming.close();return}conn=incoming;$("qdRequest").classList.remove("hidden");$("qdRequestText").textContent="وافق على الاتصال من الجهاز الآخر لبدء النقل.";status("طلب اتصال وارد","working");});
+};
+$("qdAccept").onclick=()=>{if(!conn)return;accepted=true;bindConnection(conn);sendMessage({type:"ready"});$("qdRequest").classList.add("hidden");$("qdAccept").disabled=true;sendAll()};
+$("qdCopy").onclick=async()=>{try{await navigator.clipboard.writeText($("qdLink").value);toast("تم نسخ الرابط")}catch(_){$("qdLink").select();document.execCommand("copy");toast("انسخ الرابط الآن")}};
+$("qdNew").onclick=()=>{cleanup();$("qdShare").classList.add("hidden");$("qdRequest").classList.add("hidden");$("qdCreate").disabled=!files.length;status("جاهز لإنشاء رابط جديد")};
+$("qdConnect").onclick=()=>{
+const id=$("qdPeerId").value.trim();if(!id){toast("أدخل معرّف المرسل أو افتح رابط المشاركة");return}
+cleanup();const p=initPeer();if(!p)return;$("qdConnect").disabled=true;status("جارٍ الاتصال بالمرسل...");
+p.on("open",()=>{const c=p.connect(id,{reliable:true});bindConnection(c);c.on("open",()=>status("تم إنشاء الاتصال — بانتظار موافقة المرسل","working"));});
+};
+if(target){setTab("receive");$("qdPeerId").value=target;status("تم العثور على رابط المرسل — اضغط الاتصال")}
+window.addEventListener("beforeunload",()=>{receivedUrls.forEach(URL.revokeObjectURL);cleanup()},{once:true});
 }
 function renderScreenText(){
 $("toolContent").innerHTML='<div class="tool-workspace"><span class="section-kicker">SCREEN TEXT / OCR</span><h2>استخراج النص من الصور</h2><div class="compress-panel"><label class="file-drop" for="ocrFile"><span class="drop-symbol">▧</span><strong>اختر صورة</strong><small>PNG / JPG / WEBP</small></label><input id="ocrFile" type="file" accept="image/*" class="hidden"><div id="ocrPreview" class="qr-preview hidden"><img id="ocrImage" alt="الصورة المختارة"></div><select id="ocrLang"><option value="eng">English</option><option value="ara">العربية</option><option value="fra">Français</option></select><button class="primary-btn action-wide" id="runOcr" disabled>استخراج النص</button><div class="progress-wrap hidden" id="ocrProgress"><div class="progress-track"><span id="ocrBar"></span></div><small id="ocrStatus">جارٍ التحضير</small></div><textarea id="ocrText" rows="9" placeholder="سيظهر النص المستخرج هنا"></textarea><div class="qr-actions"><button class="ghost-btn" id="copyOcr">نسخ</button><button class="ghost-btn" id="saveOcr">تنزيل TXT</button></div></div></div>';
