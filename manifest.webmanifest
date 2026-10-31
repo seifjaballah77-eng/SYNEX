@@ -1,5 +1,5 @@
 {
-  "name": "SYNEX",
+  "name": "SYNEX — أدواتك الذكية",
   "short_name": "SYNEX",
   "description": "أدواتك الذكية في مكان واحد",
   "lang": "ar",
@@ -7,9 +7,19 @@
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
+  "orientation": "any",
   "background_color": "#090b18",
   "theme_color": "#090b18",
+  "categories": [
+    "productivity",
+    "utilities"
+  ],
   "icons": [
-    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
   ]
 }
