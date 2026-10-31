@@ -17,6 +17,7 @@
     <a class="brand" href="./" aria-label="SYNEX home"><span class="brand-mark">S</span><span>SYNEX</span></a>
     <div class="top-actions">
       <button class="icon-btn" id="themeToggle" aria-label="تبديل المظهر" title="تبديل المظهر">◐</button>
+      <button class="install-top-btn" id="installNav" type="button" aria-label="تنزيل SYNEX" title="تنزيل SYNEX">⬇ <span>تنزيل</span></button>
       <button class="login-btn" id="openLogin">دخول Google</button>
       <button class="avatar-btn hidden" id="accountButton" aria-label="الحساب">S</button>
     </div>
@@ -35,7 +36,6 @@
     <button class="side-tool" data-tool="screentext" title="ScreenText OCR" aria-label="ScreenText OCR">▧</button>
     <button class="side-tool" data-tool="voicetype" title="VoiceType" aria-label="VoiceType">♫</button>
     <div class="side-spacer"></div>
-    <button class="side-tool side-install" id="sideInstall" title="تنزيل SYNEX" aria-label="تنزيل SYNEX"><span aria-hidden="true">⬇</span><small>تنزيل</small></button>
     <button class="side-tool" id="sideHistory" title="السجل" aria-label="السجل">◷</button>
     <button class="side-tool" id="sideHelp" title="مركز المساعدة" aria-label="مركز المساعدة">?</button>
   </aside>
@@ -84,7 +84,8 @@
       </div>
     </section>
 
-    <section class="install-section" id="installApp">
+    <section class="install-section hidden" id="installApp">
+      <button class="ghost-btn install-back" id="installBack" type="button">→ العودة للرئيسية</button>
       <div class="install-panel">
         <div class="install-icon" aria-hidden="true">⬇</div>
         <div class="install-copy"><span class="section-kicker">SYNEX APP</span><h2>نزّل SYNEX على أجهزتك</h2>
