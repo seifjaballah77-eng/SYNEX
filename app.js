@@ -4,11 +4,11 @@ let toastTimer,isGuest=false,isSignedIn=false,supabaseClient=null;
 function toast(m){toastEl.textContent=m;toastEl.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>toastEl.classList.remove("show"),3000)}
 const cfg=window.SYNEX_CONFIG||{};
 if(window.supabase&&cfg.supabaseUrl&&cfg.supabaseAnonKey){supabaseClient=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey);supabaseClient.auth.getSession().then(({data})=>{if(data.session)showSignedIn(data.session.user)})}
-function showSignedIn(user){isSignedIn=true;isGuest=false;dialog.close();$("openLogin").classList.add("hidden");$("accountButton").classList.remove("hidden");$("accountButton").textContent=(user.email||"S").slice(0,1).toUpperCase();toast("تم تسجيل الدخول بنجاح")}
+function showSignedIn(user){isSignedIn=true;isGuest=false;retentionCleanup();dialog.close();$("openLogin").classList.add("hidden");$("accountButton").classList.remove("hidden");$("accountButton").textContent=(user.email||"S").slice(0,1).toUpperCase();toast("تم تسجيل الدخول بنجاح")}
 function openLogin(){$("authHint").classList.toggle("hidden",!!supabaseClient);dialog.showModal()}
 $("openLogin").addEventListener("click",openLogin);
-$("startNow").addEventListener("click",()=>{if(!isGuest&&!isSignedIn)openLogin();else $("tools").scrollIntoView({behavior:"smooth"})});
-function continueAsGuest(){isGuest=true;$("guestWarning").classList.remove("hidden");dialog.close();$("tools").scrollIntoView({behavior:"smooth"});toast("تتابع كزائر — لن تُحفظ ملفاتك ومعلوماتك")}
+$("startNow").addEventListener("click",()=>{if(!isGuest&&!isSignedIn)openLogin();else openTool("compressor")});
+function continueAsGuest(){isGuest=true;retentionCleanup();$("guestWarning").classList.remove("hidden");dialog.close();openTool("compressor");toast("وضع الزائر — تُحفظ بيانات النشاط محلياً لمدة 48 ساعة") }
 $("guestSkip").addEventListener("click",continueAsGuest);$("dialogSkip").addEventListener("click",continueAsGuest);
 $("googleSignIn").addEventListener("click",async()=>{if(!supabaseClient){$("authHint").classList.remove("hidden");toast("تسجيل Google يحتاج إعداد Supabase OAuth أولاً");return}const {error}=await supabaseClient.auth.signInWithOAuth({provider:"google",options:{redirectTo:location.origin+location.pathname}});if(error)toast("تعذر بدء تسجيل الدخول: "+error.message)});
 $("themeToggle").addEventListener("click",()=>{document.body.classList.toggle("light");localStorage.setItem("synex-theme",document.body.classList.contains("light")?"light":"dark")});
