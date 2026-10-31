@@ -1,4 +1,4 @@
-const CACHE = "synex-shell-v7";
+const CACHE = "synex-shell-v8";
 const SHELL = ["./","./index.html","./styles.css","./app.js","./config.js","./manifest.webmanifest","./icon.svg"];
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(SHELL)));
