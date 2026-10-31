@@ -243,3 +243,9 @@ body.light .vs-fields input:not([type=color]):not([type=range]),body.light .vs-f
 .install-guides p{font-size:12px;color:var(--muted);line-height:2;margin-bottom:0}
 .install-note{margin-top:12px}
 @media(max-width:760px){.install-nav{padding:8px 10px;font-size:10px}.install-panel{align-items:flex-start;gap:14px}.install-icon{width:54px;height:54px;flex-basis:54px;font-size:28px;border-radius:16px}.install-guides{grid-template-columns:1fr}.install-copy .primary-btn{width:100%}}
+
+/* Single persistent sidebar shortcut to the install section */
+.side-tool.side-install{height:52px;flex-basis:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;border-color:#38e8ff55;background:#38e8ff0d;color:var(--cyan);box-shadow:0 0 13px #38e8ff12}
+.side-install span{font-size:18px;line-height:20px}.side-install small{font:700 9px/13px Alexandria,system-ui,sans-serif}
+.install-section{scroll-margin-top:88px}
+@media(max-width:760px){.app-sidebar{justify-content:flex-start;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}.app-sidebar::-webkit-scrollbar{display:none}.side-tool.side-install{height:44px;flex-basis:44px;min-width:44px}}
