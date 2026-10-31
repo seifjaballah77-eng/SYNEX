@@ -101,3 +101,18 @@ body.light .app-sidebar{background:#ffffffed}
 .qd-download-info small{font-size:10px;color:var(--muted)}
 .qd-single-download{padding:10px 13px;border-radius:10px;background:#38e8ff14;color:var(--cyan);text-decoration:none;font-size:11px;font-weight:700;white-space:nowrap}
 @media(max-width:480px){.qd-results-head{align-items:stretch;flex-direction:column}.qd-download-all{width:100%}.qd-thumb{width:60px;height:60px;flex-basis:60px}.qd-download-card{gap:8px}}
+
+/* VoiceType studio */
+.voice-panel{margin-top:18px}
+.voice-live-status{display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:#0d1328;margin-bottom:14px;color:var(--muted)}
+.voice-live-status i{width:9px;height:9px;border-radius:50%;background:#71809f;box-shadow:0 0 10px currentColor}
+.voice-live-status.recording{color:#bfffe1;border-color:#246c59}
+.voice-live-status.recording i{background:#39f0a0;box-shadow:0 0 14px #39f0a0}
+.voice-toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:12px 0}
+.voice-toolbar select{flex:1;min-width:190px}
+.voice-toolbar button{min-height:44px}
+.voice-panel h3{margin:8px 0 14px}
+.voice-command-help{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;padding:14px;border:1px solid var(--line);border-radius:14px}
+.voice-command-help b{width:100%}
+.voice-command-help span{font-size:12px;color:var(--muted);background:var(--panel2);padding:7px 10px;border-radius:9px}
+@media(max-width:600px){.voice-toolbar>*{width:100%}.voice-toolbar select{min-width:0}}
