@@ -14,17 +14,61 @@ $("googleSignIn").addEventListener("click",async()=>{if(!supabaseClient){$("auth
 $("themeToggle").addEventListener("click",()=>{document.body.classList.toggle("light");localStorage.setItem("synex-theme",document.body.classList.contains("light")?"light":"dark")});
 if(localStorage.getItem("synex-theme")==="light")document.body.classList.add("light");
 const info={quickdrop:["QuickDrop","نقل الملفات","نقل الملفات بين الأجهزة يحتاج إلى خدمة نقل واتصال مخصصة."],screentext:["ScreenText","استخراج النصوص والتصميم","استخراج النصوص من الصور وتحريرها قيد التطوير."],voicetype:["VoiceType","تحويل الصوت إلى نص","تحويل الكلام والتسجيلات إلى نص قيد التطوير."]};
-document.querySelectorAll("[data-tool]").forEach(btn=>btn.addEventListener("click",()=>{
+function openTool(name){
 if(!isGuest&&!isSignedIn){openLogin();return}
 $("tools").classList.add("hidden");document.querySelector(".hero").classList.add("hidden");$("workspace").classList.remove("hidden");
-if(btn.dataset.tool==="compressor")renderCompressor();else if(btn.dataset.tool==="qrreader")renderQrReader();else if(btn.dataset.tool==="qrgenerator")renderQrGenerator();else{$("toolContent").innerHTML='<div class="placeholder-panel"><span class="section-kicker">SYNEX WORKSPACE</span><h2></h2><p></p><p class="section-hint">هذه الأداة قيد التطوير.</p></div>';$("toolContent").querySelector("h2").textContent=info[btn.dataset.tool][0]+" — "+info[btn.dataset.tool][1];$("toolContent").querySelector("p").textContent=info[btn.dataset.tool][2]}
-window.scrollTo({top:0,behavior:"smooth"})
-}));
+document.querySelectorAll(".side-tool").forEach(b=>b.classList.toggle("active",b.dataset.tool===name));
+if(name==="compressor")renderCompressor();
+else if(name==="qrreader")renderQrReader();
+else if(name==="qrgenerator")renderQrGenerator();
+else if(name==="screentext")renderScreenText();
+else if(name==="voicetype")renderVoiceType();
+else renderQuickDrop();
+window.scrollTo({top:0,behavior:"smooth"});
+}
+document.querySelectorAll("[data-tool]").forEach(btn=>btn.addEventListener("click",()=>openTool(btn.dataset.tool)));
+document.querySelectorAll(".side-tool").forEach(btn=>btn.addEventListener("click",()=>openTool(btn.dataset.tool)));
+function showHome(){$("workspace").classList.add("hidden");$("tools").classList.remove("hidden");document.querySelector(".hero").classList.remove("hidden");document.querySelectorAll(".side-tool").forEach(b=>b.classList.remove("active"));window.scrollTo({top:0,behavior:"smooth"})}
+function showHelp(){
+$("tools").classList.add("hidden");document.querySelector(".hero").classList.add("hidden");$("workspace").classList.remove("hidden");
+$("toolContent").innerHTML='<div class="tool-workspace"><span class="section-kicker">SYNEX GUIDE</span><h2>مركز المساعدة</h2><div class="help-grid"><article><b>File Lab</b><p>ضغط GZIP لملف واحد أو ZIP لعدة ملفات ومجلدات. اختر الصور لمعاينتها وتصديرها بصيغ مختلفة.</p></article><article><b>QR Generator</b><p>أنشئ رمز QR من رابط أو نص ثم نزّله كصورة PNG.</p></article><article><b>QR Reader</b><p>ارفع صورة QR لقراءة محتواها ونسخه أو فتح الرابط.</p></article><article><b>ScreenText</b><p>استخرج النص من صورة باستخدام OCR داخل المتصفح، ثم انسخه أو نزّله TXT.</p></article><article><b>VoiceType</b><p>حوّل الكلام المباشر إلى نص باستخدام خدمة التعرف على الكلام في المتصفح؛ يتطلب متصفحاً يدعمها وميكروفوناً.</p></article><article><b>QuickDrop</b><p>نقل الملفات بين جهازين يحتاج خادم اتصال وإشارة WebRTC؛ هذه الوظيفة لم تُفعّل بعد ولا ندّعي أن النقل يعمل.</p></article><article><b>السجل والخصوصية</b><p>السجل الحالي محفوظ محلياً على هذا الجهاز. الزائر يحتفظ به 48 ساعة، والمستخدم المسجل 120 يوماً محلياً. المزامنة السحابية بين الأجهزة تحتاج إعداد قاعدة بيانات وتخزين.</p></article><article><b>تسجيل الدخول</b><p>يتطلب إعداد مفاتيح Supabase وتفعيل Google OAuth. بيانات الاتصال غير مضبوطة في نسخة الإعداد الحالية.</p></article></div></div>';
+}
+function showGlobalHistory(){
+$("tools").classList.add("hidden");document.querySelector(".hero").classList.add("hidden");$("workspace").classList.remove("hidden");
+const items=JSON.parse(localStorage.getItem("synex-global-history")||"[]");
+$("toolContent").innerHTML='<div class="tool-workspace"><span class="section-kicker">ACTIVITY</span><h2>سجل النشاط</h2><div class="history-panel" id="globalHistory"></div></div>';
+const box=$("globalHistory");if(!items.length){box.textContent="لا توجد عمليات مسجلة بعد.";return}
+items.forEach(x=>{const row=document.createElement("div");row.className="history-row";const left=document.createElement("div"),b=document.createElement("b"),s=document.createElement("small");b.textContent=x.title;s.textContent=x.date+" • "+x.type;left.append(b,s);row.append(left);box.append(row)});
+}
+function recordActivity(title,type){const key="synex-global-history";let list=[];try{list=JSON.parse(localStorage.getItem(key)||"[]")}catch(_){}list.unshift({title,type,date:new Date().toLocaleString()});localStorage.setItem(key,JSON.stringify(list.slice(0,100)))}
+$("sideHome").addEventListener("click",showHome);$("sideHelp").addEventListener("click",showHelp);$("sideHistory").addEventListener("click",showGlobalHistory);
+function renderQuickDrop(){
+$("toolContent").innerHTML='<div class="tool-workspace"><span class="section-kicker">QUICKDROP</span><h2>نقل الملفات</h2><div class="compress-panel"><div class="placeholder-panel"><b>النقل المباشر بين الأجهزة غير مفعّل بعد</b><p>لإنجازه بشكل حقيقي نحتاج خدمة signaling واتصال WebRTC، وقد نحتاج TURN حتى يعمل عبر شبكات مختلفة. لن أعرض زر إرسال وهمياً قبل إعداد هذه الخدمة.</p></div></div></div>';
+}
+function renderScreenText(){
+$("toolContent").innerHTML='<div class="tool-workspace"><span class="section-kicker">SCREEN TEXT / OCR</span><h2>استخراج النص من الصور</h2><div class="compress-panel"><label class="file-drop" for="ocrFile"><span class="drop-symbol">▧</span><strong>اختر صورة</strong><small>PNG / JPG / WEBP</small></label><input id="ocrFile" type="file" accept="image/*" class="hidden"><div id="ocrPreview" class="qr-preview hidden"><img id="ocrImage" alt="الصورة المختارة"></div><select id="ocrLang"><option value="eng">English</option><option value="ara">العربية</option><option value="fra">Français</option></select><button class="primary-btn action-wide" id="runOcr" disabled>استخراج النص</button><div class="progress-wrap hidden" id="ocrProgress"><div class="progress-track"><span id="ocrBar"></span></div><small id="ocrStatus">جارٍ التحضير</small></div><textarea id="ocrText" rows="9" placeholder="سيظهر النص المستخرج هنا"></textarea><div class="qr-actions"><button class="ghost-btn" id="copyOcr">نسخ</button><button class="ghost-btn" id="saveOcr">تنزيل TXT</button></div></div></div>';
+let file=null,url="";
+$("ocrFile").onchange=()=>{file=$("ocrFile").files[0];if(!file)return;if(url)URL.revokeObjectURL(url);url=URL.createObjectURL(file);$("ocrImage").src=url;$("ocrPreview").classList.remove("hidden");$("runOcr").disabled=false};
+$("runOcr").onclick=async()=>{if(!file)return;if(!window.Tesseract){toast("تعذر تحميل محرك OCR؛ تحقق من الاتصال");return}$("runOcr").disabled=true;$("ocrProgress").classList.remove("hidden");try{const lang=$("ocrLang").value;const result=await Tesseract.recognize(file,lang,{logger:m=>{if(m.progress!==undefined){$("ocrBar").style.width=Math.round(m.progress*100)+"%";$("ocrStatus").textContent=m.status||"جارٍ التعرف"}}});$("ocrText").value=result.data.text||"";recordActivity(file.name,"OCR");toast("اكتمل استخراج النص")}catch(e){toast("تعذر OCR: "+e.message)}finally{$("runOcr").disabled=false}};
+$("copyOcr").onclick=async()=>{try{await navigator.clipboard.writeText($("ocrText").value);toast("تم النسخ")}catch(_){$("ocrText").select();document.execCommand("copy")}};
+$("saveOcr").onclick=()=>downloadText($("ocrText").value,"SYNEX-OCR.txt");
+}
+function downloadText(value,name){const a=document.createElement("a"),u=URL.createObjectURL(new Blob([value],{type:"text/plain;charset=utf-8"}));a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),10000)}
+function renderVoiceType(){
+$("toolContent").innerHTML='<div class="tool-workspace"><span class="section-kicker">VOICE TYPE</span><h2>تحويل الكلام إلى نص</h2><div class="compress-panel"><div class="mode-switch"><button class="mode-btn active" id="voiceStart">● بدء التسجيل</button><button class="mode-btn" id="voiceStop" disabled>■ إيقاف</button></div><select id="voiceLang"><option value="ar-TN">العربية (تونس)</option><option value="ar-SA">العربية</option><option value="fr-FR">Français</option><option value="en-US">English</option></select><textarea id="voiceText" rows="10" placeholder="سيظهر الكلام هنا..."></textarea><div class="qr-actions"><button class="ghost-btn" id="copyVoice">نسخ</button><button class="ghost-btn" id="saveVoice">تنزيل TXT</button></div><p class="compression-note" id="voiceStatus">يتطلب متصفحاً يدعم Speech Recognition وإذن الميكروفون. قد تتم معالجة الصوت عبر خدمة المتصفح.</p></div></div>';
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;let rec=null;
+if(!SR){$("voiceStart").disabled=true;$("voiceStatus").textContent="هذا المتصفح لا يدعم التعرف على الكلام. جرّب Chrome أو Edge بإصدار حديث."}
+else{rec=new SR();rec.continuous=true;rec.interimResults=true;rec.onresult=e=>{let final="";for(let i=e.resultIndex;i<e.results.length;i++)final+=e.results[i][0].transcript+(e.results[i].isFinal?" ":"");$("voiceText").value+=final};rec.onerror=e=>{$("voiceStatus").textContent="تعذر التسجيل: "+e.error};rec.onend=()=>{$("voiceStart").disabled=false;$("voiceStop").disabled=true};$("voiceStart").onclick=()=>{rec.lang=$("voiceLang").value;try{rec.start();$("voiceStart").disabled=true;$("voiceStop").disabled=false;$("voiceStatus").textContent="الميكروفون يعمل..."}catch(e){toast("تعذر بدء التسجيل")}};$("voiceStop").onclick=()=>rec.stop()}
+$("copyVoice").onclick=async()=>{try{await navigator.clipboard.writeText($("voiceText").value);toast("تم النسخ")}catch(_){$("voiceText").select();document.execCommand("copy")}};
+$("saveVoice").onclick=()=>downloadText($("voiceText").value,"SYNEX-Voice.txt");
+}
 const HISTORY_KEY="synex-compression-history-v1";
+function retentionCleanup(){const keys=["synex-compression-history-v1","synex-global-history"];const age=(isSignedIn?120:2)*86400000;keys.forEach(k=>{try{const a=JSON.parse(localStorage.getItem(k)||"[]"),now=Date.now();const keep=a.filter(x=>{const t=Date.parse(x.date||"");return !Number.isFinite(t)||now-t<age});localStorage.setItem(k,JSON.stringify(keep))}catch(_){}})}
+retentionCleanup();
 function getHistory(){try{return JSON.parse(localStorage.getItem(HISTORY_KEY)||"[]")}catch(_){return[]}}
 function saveHistory(item){const h=getHistory();h.unshift(item);localStorage.setItem(HISTORY_KEY,JSON.stringify(h.slice(0,25)))}
 function renderHistory(){const h=getHistory(),el=$("historyList");if(!el)return;if(!h.length){el.innerHTML='<p class="compression-note">لا توجد عمليات سابقة بعد.</p>';return}el.innerHTML=h.map(x=>'<div class="history-row"><div><b></b><small></small></div><strong></strong></div>').join("");[...el.children].forEach((node,i)=>{node.children[0].children[0].textContent=h[i].name;node.children[0].children[1].textContent=h[i].date+" • "+h[i].kind;node.children[1].textContent=h[i].result})}
-function addHistory(name,kind,result){saveHistory({name,kind,result,date:new Date().toLocaleString()});renderHistory()}
+function addHistory(name,kind,result){saveHistory({name,kind,result,date:new Date().toLocaleString()});recordActivity(name,kind);renderHistory()}
 function formatBytes(n){if(!Number.isFinite(n))return"—";const u=["B","KB","MB","GB","TB"];let i=0;while(n>=1024&&i<u.length-1){n/=1024;i++}return n.toFixed(i?1:0)+" "+u[i]}
 function suggestion(files){const f=files[0],ext=(f.name.split(".").pop()||"").toLowerCase(),already=["jpg","jpeg","png","webp","gif","mp4","mp3","zip","gz","pdf","7z","rar","avif"].includes(ext);if(already)return{level:1,label:"ضغط خفيف",reason:"هذا النوع مضغوط مسبقاً غالباً؛ الضغط القوي قد يستهلك وقتاً دون توفير واضح."};if(["txt","csv","json","xml","html","js","css","svg","log"].includes(ext))return{level:9,label:"أقصى ضغط",reason:"الملفات النصية غالباً تستفيد من الضغط الأقوى."};if(["docx","xlsx","pptx"].includes(ext))return{level:3,label:"ضغط خفيف",reason:"هذه الصيغ تحتوي ضغطاً داخلياً بالفعل."};return{level:6,label:"متوازن",reason:"اقتراح عام؛ يمكنك تغيير المستوى وتجربة النتيجة."}}
 function renderCompressor(){
@@ -102,7 +146,7 @@ $("toolContent").innerHTML=`<div class="tool-workspace"><span class="section-kic
 $("qrImage").onchange=()=>{const f=$("qrImage").files[0];if(!f)return;const im=new Image(),url=URL.createObjectURL(f);im.onload=()=>{$("qrPreview").classList.remove("hidden");$("qrImagePreview").src=url;const c=document.createElement("canvas"),ctx=c.getContext("2d",{willReadFrequently:true}),s=Math.min(1,1800/Math.max(im.naturalWidth,im.naturalHeight));c.width=Math.round(im.naturalWidth*s);c.height=Math.round(im.naturalHeight*s);ctx.drawImage(im,0,0,c.width,c.height);const d=ctx.getImageData(0,0,c.width,c.height),code=window.jsQR&&jsQR(d.data,d.width,d.height,{inversionAttempts:"attemptBoth"});if(!code){$("qrStatus").textContent="لم نعثر على QR واضح. جرّب صورة أوضح.";return}$("qrResult").classList.remove("hidden");$("qrText").value=code.data;const link=$("openQr");if(/^https?:\/\//i.test(code.data)){link.href=code.data;link.classList.remove("hidden")}else link.classList.add("hidden");$("qrStatus").textContent="تمت قراءة الرمز بنجاح.";URL.revokeObjectURL(url)};im.onerror=()=>{$("qrStatus").textContent="تعذر فتح الصورة"};im.src=url};
 $("copyQr").onclick=async()=>{try{await navigator.clipboard.writeText($("qrText").value);toast("تم النسخ")}catch(_){$("qrText").select();document.execCommand("copy")}}
 }
-$("backHome").onclick=()=>{$("workspace").classList.add("hidden");$("tools").classList.remove("hidden");document.querySelector(".hero").classList.remove("hidden");window.scrollTo({top:0,behavior:"smooth"})};
+$("backHome").onclick=showHome;
 $("accountButton").onclick=async()=>{if(supabaseClient&&confirm("هل تريد تسجيل الخروج؟")){const{error}=await supabaseClient.auth.signOut();if(!error)location.reload()}};
 window.addEventListener("online",()=>toast("عاد الاتصال بالإنترنت"));window.addEventListener("offline",()=>toast("أنت غير متصل بالإنترنت"));
 if("serviceWorker"in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
