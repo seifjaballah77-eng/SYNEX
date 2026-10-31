@@ -235,7 +235,7 @@ const mime=MediaRecorder.isTypeSupported("audio/webm;codecs=opus")?"audio/webm;c
 recorder=new MediaRecorder(audioStream,{mimeType:mime});
 recorder.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
 recorder.onstop=()=>{const blob=new Blob(chunks,{type:"audio/webm"});downloadBlob(blob,"SYNEX-Voice-"+Date.now()+".webm");audioStream.getTracks().forEach(t=>t.stop());$("speechStatus").textContent="تم تجهيز التسجيل بصيغة WEBM. إذا كان الملف صامتاً، جرّب مشاركة صوت التبويب مرة أخرى."};
-recorder.start();const utter=new SpeechSynthesisUtterance(text),v=selectedVoice();if(v){utter.voice=v;utter.lang=v.lang}
+recorder.start();const utter=new SpeechSynthesisUtterance(text),v=selectedVoice(),style=selectedStyle();utter.pitch=style[1];utter.rate=style[2];if(v){utter.voice=v;utter.lang=v.lang}
 utter.onend=()=>setTimeout(()=>{if(recorder&&recorder.state!=="inactive")recorder.stop()},500);
 utter.onerror=()=>{if(recorder&&recorder.state!=="inactive")recorder.stop();$("speechStatus").textContent="تعذر نطق النص."};
 window.speechSynthesis.cancel();window.speechSynthesis.speak(utter);
