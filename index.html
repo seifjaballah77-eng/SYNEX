@@ -18,6 +18,7 @@
     <div class="top-actions">
       <button class="icon-btn" id="themeToggle" aria-label="تبديل المظهر" title="تبديل المظهر">◐</button>
       <button class="install-top-btn" id="installNav" type="button" aria-label="تنزيل SYNEX" title="تنزيل SYNEX">⬇ <span>تنزيل</span></button>
+      <label class="language-picker" title="تغيير لغة الموقع"><span aria-hidden="true">文</span><select id="languageSelect" aria-label="لغة الموقع"><option value="ar">العربية</option><option value="fr">Français</option><option value="en">English</option><option value="ru">Русский</option><option value="hi">हिन्दी</option></select></label>
       <button class="login-btn" id="openLogin">دخول Google</button>
       <button class="avatar-btn hidden" id="accountButton" aria-label="الحساب">S</button>
     </div>
@@ -122,6 +123,7 @@
     </form>
   </dialog>
   <div class="toast" id="toast" role="status"></div>
+  <div id="google_translate_element" class="translate-engine" aria-hidden="true"></div>
   <script src="./config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.js"></script>
