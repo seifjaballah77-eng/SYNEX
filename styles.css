@@ -127,3 +127,6 @@ body.light .app-sidebar{background:#ffffffed}
 .history-actions button{white-space:nowrap;padding:9px 12px;font-size:11px}
 .history-no-file{max-width:190px;text-align:left}
 @media(max-width:620px){.history-file-row{align-items:stretch;flex-direction:column}.history-actions{justify-content:stretch}.history-actions button{flex:1}.history-no-file{max-width:none}}
+
+/* Voice FX recorder */
+.fx-meter{display:flex;justify-content:space-between;gap:12px;align-items:center;margin:12px 0;color:var(--muted);font-size:12px}.fx-meter span:first-child{font-variant-numeric:tabular-nums;color:var(--cyan);font-weight:700}.fx-audio{display:block;width:100%;margin:16px 0;filter: saturate(.85)}
