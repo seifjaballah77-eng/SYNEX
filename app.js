@@ -420,8 +420,6 @@ if(format==="gif"){
 graph+=";"+current+"fps=12,scale=480:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse[vout]";
 args.push("-filter_complex",graph,"-map","[vout]","-loop","0","-an","-y",output);
 }else{
-if(filters.length||overlayEntries.length)args.push("-filter_complex",graph,"-map",current);
-else args.push("-map","0:v:0");
 if(audioIndex>=0&&el("vsMixAudio").checked&&!el("vsMute").checked){
 graph+=";["+audioIndex+":a:0]volume="+Number(el("vsVolume").value)+"[extra];[0:a:0]"+(speed!==1?"atempo="+speed+",":"")+"volume=1[original];[original][extra]amix=inputs=2:duration=first:dropout_transition=2[aout]";
 args.push("-filter_complex",graph,"-map",current,"-map","[aout]","-c:a","aac","-b:a","160k","-shortest");
