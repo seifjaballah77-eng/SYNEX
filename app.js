@@ -228,7 +228,7 @@ const replacements=[
 [/اغلق\s+علام(?:ة|ه)\s+تنصيص/gi,"”"]
 ];
 for(const [pattern,value] of replacements)out=out.replace(pattern,value);
-out=out.replace(/([()؟،.!])(?:\\s*\\1)+/g,"$1");
+out=out.replace(/([()؟،.!])(?:\s*\1)+/g,"$1");
 return out;
 }
 if(!SR){$("voiceStart").disabled=true;status("التعرف على الكلام غير مدعوم في هذا المتصفح. جرّب Chrome حديثاً.");}
