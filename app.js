@@ -138,7 +138,7 @@ $("saveOcr").onclick=()=>downloadText($("ocrText").value,"SYNEX-OCR.txt");
 }
 function downloadText(value,name){const a=document.createElement("a"),u=URL.createObjectURL(new Blob([value],{type:"text/plain;charset=utf-8"}));a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),10000)}
 function renderVoiceType(){
-$("toolContent").innerHTML='<div class="tool-workspace"><span class="section-kicker">SYNEX VOICE STUDIO</span><h2>تحويل الكلام والصوت</h2><p>تحدث ليظهر النص مباشرة، أو اكتب نصاً واختر صوتاً لتجربته. أوامر الترقيم تُنفّذ كرموز بدلاً من تكرار الكلمات.</p><div class="compress-panel voice-panel"><div class="voice-live-status" id="voiceStatus"><i></i><span>جاهز — اضغط بدء التسجيل واسمح باستخدام الميكروفون</span></div><div class="voice-toolbar"><select id="voiceLang" aria-label="لغة التعرف على الكلام"><option value="ar-TN">العربية (تونس)</option><option value="ar-SA">العربية</option><option value="ar-EG">العربية (مصر)</option><option value="fr-FR">Français</option><option value="en-US">English</option><option value="ru-RU">Русский</option></select><button class="primary-btn" id="voiceStart">● بدء الكلام</button><button class="ghost-btn" id="voiceStop" disabled>■ إيقاف</button></div><label for="voiceText">النص الناتج</label><textarea id="voiceText" rows="8" placeholder="ابدأ التحدث أو اكتب هنا..."></textarea><div class="qr-actions"><button class="ghost-btn" id="copyVoice">نسخ النص</button><button class="ghost-btn" id="clearVoice">مسح</button><button class="ghost-btn" id="saveVoice">تنزيل TXT</button></div><div class="voice-command-help"><b>الأوامر الصوتية</b><span>افتح قوس ← (</span><span>أغلق قوس ← )</span><span>علامة استفهام ← ؟</span><span>فاصلة ← ،</span><span>نقطة ← .</span><span>سطر جديد ← سطر جديد</span></div></div><div class="compress-panel voice-panel"><span class="section-kicker">TEXT TO SPEECH</span><h3>حوّل النص إلى صوت</h3><textarea id="speakText" rows="4" placeholder="اكتب النص الذي تريد سماعه..."></textarea><label for="voiceSelect">اختر صوتاً من الأصوات المتاحة على جهازك (حتى 20 صوتاً)</label><select id="voiceSelect"></select><div class="voice-toolbar"><button class="primary-btn" id="previewVoice">▶ تجربة الصوت</button><button class="ghost-btn" id="stopVoice">إيقاف الصوت</button><button class="ghost-btn" id="downloadSpeech">تنزيل الصوت WAV/WEBM</button></div><p class="compression-note" id="speechStatus">الأصوات تختلف حسب نظام التشغيل واللغات المثبتة. لتنزيل الصوت سيطلب المتصفح مشاركة صوت هذا التبويب؛ اختر مشاركة صوت التبويب.</p></div></div>';
+$("toolContent").innerHTML='<div class="tool-workspace"><span class="section-kicker">SYNEX VOICE STUDIO</span><h2>تحويل الكلام والصوت</h2><p>تحدث ليظهر النص مباشرة، أو اكتب نصاً واختر صوتاً لتجربته. أوامر الترقيم تُنفّذ كرموز بدلاً من تكرار الكلمات.</p><div class="compress-panel voice-panel"><div class="voice-live-status" id="voiceStatus"><i></i><span>جاهز — اضغط بدء التسجيل واسمح باستخدام الميكروفون</span></div><div class="voice-toolbar"><select id="voiceLang" aria-label="لغة التعرف على الكلام"><option value="ar-TN">العربية (تونس)</option><option value="ar-SA">العربية</option><option value="ar-EG">العربية (مصر)</option><option value="fr-FR">Français</option><option value="en-US">English</option><option value="ru-RU">Русский</option></select><button class="primary-btn" id="voiceStart">● بدء الكلام</button><button class="ghost-btn" id="voiceStop" disabled>■ إيقاف</button></div><label for="voiceText">النص الناتج</label><textarea id="voiceText" rows="8" placeholder="ابدأ التحدث أو اكتب هنا..."></textarea><div class="qr-actions"><button class="ghost-btn" id="copyVoice">نسخ النص</button><button class="ghost-btn" id="clearVoice">مسح</button><button class="ghost-btn" id="saveVoice">تنزيل TXT</button></div><div class="voice-command-help"><b>الأوامر الصوتية</b><span>افتح قوس ← (</span><span>أغلق قوس ← )</span><span>علامة استفهام ← ؟</span><span>فاصلة ← ،</span><span>نقطة ← .</span><span>سطر جديد ← سطر جديد</span></div></div><div class="compress-panel voice-panel"><span class="section-kicker">TEXT TO SPEECH</span><h3>حوّل النص إلى صوت</h3><textarea id="speakText" rows="4" placeholder="اكتب النص الذي تريد سماعه..."></textarea><label for="voiceSelect">اختر نمط الصوت (20 تأثيراً)</label><select id="voiceSelect"></select><label for="baseVoiceSelect">الصوت الأساسي المثبت على جهازك</label><select id="baseVoiceSelect"></select><div class="voice-toolbar"><button class="primary-btn" id="previewVoice">▶ تجربة الصوت</button><button class="ghost-btn" id="stopVoice">إيقاف الصوت</button><button class="ghost-btn" id="downloadSpeech">تنزيل الصوت WEBM</button></div><p class="compression-note" id="speechStatus">الأصوات تختلف حسب نظام التشغيل واللغات المثبتة. لتنزيل الصوت سيطلب المتصفح مشاركة صوت هذا التبويب؛ اختر مشاركة صوت التبويب.</p></div></div>';
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 let rec=null,finalText="",isListening=false,voices=[];
 const status=(msg,active=false)=>{$("voiceStatus").querySelector("span").textContent=msg;$("voiceStatus").classList.toggle("recording",active)};
@@ -194,18 +194,26 @@ $("voiceText").addEventListener("input",()=>{finalText=$("voiceText").value});
 $("copyVoice").onclick=async()=>{try{await navigator.clipboard.writeText($("voiceText").value);toast("تم نسخ النص")}catch(_){$("voiceText").select();document.execCommand("copy")}};
 $("clearVoice").onclick=()=>{$("voiceText").value="";finalText="";};
 $("saveVoice").onclick=()=>downloadText($("voiceText").value,"SYNEX-Voice.txt");
+const voiceStyles=[
+["فضائي",1.8,.82],["روبوت",.72,.92],["عميق",.55,.86],["عملاق",.35,.72],["طفولي",1.85,1.12],
+["كرتوني",1.65,1.22],["سريع",1,1.42],["بطيء",1,.72],["همس هادئ",.92,.82],["مذيع",.94,1],
+["إذاعي عميق",.62,.94],["مرح",1.35,1.12],["حازم",.78,.98],["رفيع",1.72,1.04],["غامض",.68,.8],
+["آلي مستقبلي",1.45,.9],["هادئ",1,.88],["نشِط",1.18,1.28],["سينمائي",.7,.9],["فضائي غريب",1.95,.68]
+];
 function loadVoices(){
-voices=(window.speechSynthesis?window.speechSynthesis.getVoices():[]).slice(0,20);
-const select=$("voiceSelect");select.innerHTML="";
-if(!voices.length){const o=document.createElement("option");o.textContent="لا توجد أصوات مثبتة أو لم تُحمّل بعد";o.value="";select.append(o);return}
-voices.forEach((v,i)=>{const o=document.createElement("option");o.value=String(i);o.textContent=(i+1)+". "+v.name+" — "+v.lang;select.append(o)});
+voices=window.speechSynthesis?window.speechSynthesis.getVoices():[];
+const base=$("baseVoiceSelect");base.innerHTML="";
+if(!voices.length){const o=document.createElement("option");o.textContent="الصوت الافتراضي للنظام";o.value="";base.append(o)}
+voices.forEach((v,i)=>{const o=document.createElement("option");o.value=String(i);o.textContent=v.name+" — "+v.lang;base.append(o)});
 }
+const styleSelect=$("voiceSelect");voiceStyles.forEach((s,i)=>{const o=document.createElement("option");o.value=String(i);o.textContent=(i+1)+". "+s[0];styleSelect.append(o)});
 if(window.speechSynthesis){loadVoices();window.speechSynthesis.onvoiceschanged=loadVoices;}
-function selectedVoice(){return voices[Number($("voiceSelect").value)]||voices[0]||null}
+function selectedVoice(){return voices[Number($("baseVoiceSelect").value)]||voices[0]||null}
+function selectedStyle(){return voiceStyles[Number($("voiceSelect").value)]||voiceStyles[0]}
 function speakNow(){
 const text=$("speakText").value.trim();if(!text){toast("اكتب نصاً أولاً");return}
 if(!window.speechSynthesis){$("speechStatus").textContent="تحويل النص إلى صوت غير مدعوم هنا.";return}
-window.speechSynthesis.cancel();const utter=new SpeechSynthesisUtterance(text),v=selectedVoice();if(v){utter.voice=v;utter.lang=v.lang}
+window.speechSynthesis.cancel();const utter=new SpeechSynthesisUtterance(text),v=selectedVoice(),style=selectedStyle();utter.pitch=style[1];utter.rate=style[2];if(v){utter.voice=v;utter.lang=v.lang}
 utter.onstart=()=>{$("speechStatus").textContent="الصوت يعمل الآن: "+(v?v.name:"الصوت الافتراضي")};
 utter.onend=()=>{$("speechStatus").textContent="انتهت التجربة."};
 utter.onerror=()=>{$("speechStatus").textContent="تعذر تشغيل هذا الصوت."};
