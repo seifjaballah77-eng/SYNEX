@@ -66,7 +66,6 @@ main{width:min(1120px,calc(100% - 36px))}
 body.light .app-sidebar{background:#ffffffed}
 @media(max-width:760px){body{padding-left:0;padding-bottom:76px}.app-sidebar{top:auto;bottom:10px;left:50%;transform:translateX(-50%);width:min(94vw,520px);min-height:0;height:60px;flex-direction:row;justify-content:space-around;padding:7px;border-radius:18px;gap:3px}.side-brand,.side-tool{width:40px;height:40px;flex-basis:40px;font-size:17px}.side-divider{width:1px;height:28px;margin:0}.side-spacer{display:none}.help-grid{grid-template-columns:1fr}main{width:min(100% - 28px,560px)}}
 
-.tools-section{display:none!important}
 .image-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:12px}
 .image-thumb{min-width:0;border:1px solid var(--line);border-radius:13px;overflow:hidden;background:var(--panel)}
 .image-thumb>img{display:block;width:100%;height:125px;object-fit:cover;background:#080b17}
@@ -130,3 +129,62 @@ body.light .app-sidebar{background:#ffffffed}
 
 /* Voice FX recorder */
 .fx-meter{display:flex;justify-content:space-between;gap:12px;align-items:center;margin:12px 0;color:var(--muted);font-size:12px}.fx-meter span:first-child{font-variant-numeric:tabular-nums;color:var(--cyan);font-weight:700}.fx-audio{display:block;width:100%;margin:16px 0;filter: saturate(.85)}
+
+
+/* SYNEX Video Studio */
+.vs-workspace{max-width:1080px}
+.vs-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,1.08fr);gap:18px;align-items:start;margin-top:20px}
+.vs-preview-card{position:sticky;top:16px;display:flex;flex-direction:column;gap:12px;padding:16px;border:1px solid var(--line);border-radius:18px;background:var(--panel)}
+.vs-preview-head{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.vs-preview-head b,.vs-output>b{color:var(--cyan);font-size:13px}
+.vs-preview-head span{color:var(--muted);font-size:10px;text-align:left;overflow-wrap:anywhere}
+.vs-preview-card video{display:block;width:100%;max-height:430px;min-height:190px;object-fit:contain;background:#03050d;border-radius:12px}
+.vs-preview-tools,.vs-quick-actions,.vs-recorder,.vs-buttons,.tl-buttons{display:flex;gap:8px;flex-wrap:wrap}
+.vs-preview-tools button,.vs-quick-actions button{flex:1;min-width:110px;padding:10px 8px;font-size:10px}
+.vs-panel{margin-top:0;gap:14px}
+.vs-section-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:5px;padding-top:13px;border-top:1px solid var(--line)}
+.vs-section-title b{color:var(--cyan);font-size:13px}
+.vs-section-title small{font-size:10px;color:var(--muted);text-align:left}
+.vs-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+.vs-fields label,.vs-panel>label:not(.file-drop){display:flex;flex-direction:column;gap:7px;font-size:11px;color:var(--muted);min-width:0}
+.vs-fields input:not([type=color]):not([type=range]),.vs-fields select,.vs-panel textarea{width:100%;min-width:0;padding:10px 11px;border:1px solid var(--line);border-radius:10px;background:#080b17;color:var(--text);font:12px/1.7 inherit}
+.vs-fields input[type=color]{width:100%;height:40px;padding:3px;border:1px solid var(--line);border-radius:9px;background:#080b17}
+.vs-panel textarea{resize:vertical;direction:auto}
+.vs-fields input[type=range],.vs-volume input{width:100%;accent-color:var(--cyan)}
+.vs-checks{display:flex;gap:12px;flex-wrap:wrap}
+.vs-checks label{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted)}
+.vs-checks input{accent-color:var(--cyan)}
+.vs-audio-drop{min-height:110px}
+.vs-volume{display:flex;flex-direction:column;gap:7px;font-size:11px;color:var(--muted)}
+.vs-recorder{align-items:center;padding:12px;border:1px solid var(--line);border-radius:12px}
+.vs-recorder button{font-size:10px;padding:9px}
+.vs-recorder span{font-size:10px;color:var(--muted)}
+.vs-actions{display:flex;flex-direction:column;gap:10px}
+.vs-output{display:flex;flex-direction:column;gap:10px;padding:12px;border:1px solid #38e8ff55;border-radius:13px}
+.vs-output video{max-height:260px;min-height:100px}
+.vs-output a{display:block;text-align:center;text-decoration:none}
+.vs-output a:hover{color:#fff}
+.videostudio:hover{border-color:#38e8ff;box-shadow:0 12px 38px #38e8ff18}
+.videostudio .tool-icon{color:var(--cyan);background:#38e8ff12;border-color:#38e8ff44}
+.textlab:hover{border-color:#b48aff;box-shadow:0 12px 38px #b48aff18}
+.textlab .tool-icon{color:#c09aff;background:#b48aff12;border-color:#b48aff44}
+.textlab-workspace .compress-panel{max-width:920px;margin-left:auto;margin-right:auto}
+.tl-password-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:8px}
+.tl-password-row input{min-width:0;padding:12px;border:1px solid var(--line);border-radius:10px;background:#080b17;color:var(--cyan);font:13px monospace;direction:ltr}
+.tl-password-row button{padding:10px 13px;font-size:11px}
+.tl-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.tl-stats>div{display:flex;flex-direction:column;gap:7px;padding:13px;border:1px solid var(--line);border-radius:11px;background:#ffffff05}
+.tl-stats small{font-size:10px;color:var(--muted)}
+.tl-stats b{color:var(--cyan);font-size:17px;font-variant-numeric:tabular-nums}
+.tl-compare label{gap:8px}
+.tl-diff{max-height:460px;overflow:auto;margin-top:12px;padding:12px;border:1px solid var(--line);border-radius:12px;background:#070a15;direction:ltr;text-align:left;font:12px/1.8 monospace}
+.tl-diff>div{white-space:pre-wrap;overflow-wrap:anywhere;padding:2px 7px;border-radius:4px}
+.tl-diff span{display:inline-block;width:20px;font-weight:800}
+.tl-added{background:#1b573b55;color:#9fffc6}
+.tl-removed{background:#6d293955;color:#ffadb9}
+.tl-same{color:#c3cbe0}
+.tl-buttons button{font-size:10px;padding:9px 11px}
+body.light .vs-preview-card{background:#fff}
+body.light .vs-fields input:not([type=color]):not([type=range]),body.light .vs-fields select,body.light .vs-panel textarea,body.light .tl-password-row input{background:#f8f9ff;color:#171b2c}
+@media(max-width:900px){.vs-layout{grid-template-columns:1fr}.vs-preview-card{position:static}.vs-preview-card video{max-height:360px}}
+@media(max-width:600px){.vs-fields{grid-template-columns:1fr}.tl-password-row{grid-template-columns:1fr 1fr}.tl-password-row input{grid-column:1/-1}.tl-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.vs-preview-tools{display:grid;grid-template-columns:1fr}.vs-recorder button{flex:1}.vs-section-title{align-items:flex-start;flex-direction:column}}
