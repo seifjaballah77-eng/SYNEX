@@ -227,3 +227,19 @@ body.light .vs-fields input:not([type=color]):not([type=range]),body.light .vs-f
  .app-sidebar .quickdrop-nav{width:46px;height:46px;flex-basis:46px;font-size:25px}
  .tool-grid>.tool-card.quickdrop{grid-column:1/-1;min-height:190px}
 }
+
+/* SYNEX install section */
+.install-nav{border:1px solid #38e8ff66;border-radius:11px;padding:10px 14px;background:#38e8ff12;color:var(--cyan);font-size:12px;font-weight:800;white-space:nowrap}
+.install-nav:hover{background:#38e8ff22;box-shadow:0 0 18px #38e8ff30}
+.install-section{padding:10px 0 70px;scroll-margin-top:90px}
+.install-panel{display:flex;align-items:center;gap:22px;padding:clamp(20px,4vw,34px);border:1px solid #38e8ff55;border-radius:22px;background:linear-gradient(120deg,#102b3cdd,#17182f 70%,#202044);box-shadow:0 12px 38px #38e8ff10}
+.install-icon{width:76px;height:76px;flex:0 0 76px;border-radius:22px;display:grid;place-items:center;font-size:38px;color:var(--cyan);background:#38e8ff18;border:1px solid #38e8ff70;box-shadow:0 0 24px #38e8ff25}
+.install-copy h2{margin:8px 0;font-size:clamp(20px,3vw,27px)}
+.install-copy p,.install-note{font-size:12px;color:var(--muted);line-height:2}
+.install-status{min-height:20px;margin:9px 0 0}
+.install-guides{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:15px}
+.install-guides article{padding:19px;border:1px solid var(--line);border-radius:16px;background:var(--panel)}
+.install-guides b{color:var(--cyan);font-size:14px}
+.install-guides p{font-size:12px;color:var(--muted);line-height:2;margin-bottom:0}
+.install-note{margin-top:12px}
+@media(max-width:760px){.install-nav{padding:8px 10px;font-size:10px}.install-panel{align-items:flex-start;gap:14px}.install-icon{width:54px;height:54px;flex-basis:54px;font-size:28px;border-radius:16px}.install-guides{grid-template-columns:1fr}.install-copy .primary-btn{width:100%}}
