@@ -116,3 +116,14 @@ body.light .app-sidebar{background:#ffffffed}
 .voice-command-help b{width:100%}
 .voice-command-help span{font-size:12px;color:var(--muted);background:var(--panel2);padding:7px 10px;border-radius:9px}
 @media(max-width:600px){.voice-toolbar>*{width:100%}.voice-toolbar select{min-width:0}}
+
+/* Persistent activity file vault */
+.history-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:12px 0;color:var(--muted);font-size:12px}
+.history-file-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px;margin:9px 0;border:1px solid var(--line);border-radius:13px;background:#ffffff05}
+.history-file-row>div:first-child{display:flex;flex-direction:column;gap:6px;min-width:0}
+.history-file-row b{overflow-wrap:anywhere}
+.history-file-row small{color:var(--muted);font-size:11px;overflow-wrap:anywhere}
+.history-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.history-actions button{white-space:nowrap;padding:9px 12px;font-size:11px}
+.history-no-file{max-width:190px;text-align:left}
+@media(max-width:620px){.history-file-row{align-items:stretch;flex-direction:column}.history-actions{justify-content:stretch}.history-actions button{flex:1}.history-no-file{max-width:none}}
