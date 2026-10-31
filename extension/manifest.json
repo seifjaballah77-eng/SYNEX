@@ -7,8 +7,5 @@
   "action": {
     "default_title": "فتح SYNEX Voice",
     "default_popup": "popup.html"
-  },
-  "icons": {
-    "128": "icon.svg"
   }
 }
