@@ -32,12 +32,59 @@ $("toolContent").innerHTML='<div class="tool-workspace"><span class="section-kic
 }
 function showGlobalHistory(){
 $("tools").classList.add("hidden");document.querySelector(".hero").classList.add("hidden");$("workspace").classList.remove("hidden");
-const items=JSON.parse(localStorage.getItem("synex-global-history")||"[]");
-$("toolContent").innerHTML='<div class="tool-workspace"><span class="section-kicker">ACTIVITY</span><h2>سجل النشاط</h2><div class="history-panel" id="globalHistory"></div></div>';
-const box=$("globalHistory");if(!items.length){box.textContent="لا توجد عمليات مسجلة بعد.";return}
-items.forEach(x=>{const row=document.createElement("div");row.className="history-row";const left=document.createElement("div"),b=document.createElement("b"),s=document.createElement("small");b.textContent=x.title;s.textContent=x.date+" • "+x.type;left.append(b,s);row.append(left);box.append(row)});
+const items=readActivity();
+$("toolContent").innerHTML='<div class="tool-workspace"><span class="section-kicker">ACTIVITY VAULT</span><h2>سجل الملفات والعمليات</h2><p>تبقى السجلات على هذا الجهاز دون حذف تلقائي. الملفات التي تم حفظها يمكن فتحها أو إعادة تنزيلها.</p><div class="history-toolbar"><span id="historyCount"></span><button class="ghost-btn" id="clearGlobalHistory">مسح السجل والملفات</button></div><div class="history-panel" id="globalHistory"></div></div>';
+const box=$("globalHistory");$("historyCount").textContent=items.length+" عملية محفوظة";
+if(!items.length){box.textContent="لا توجد عمليات مسجلة بعد.";return}
+items.forEach(x=>{
+const row=document.createElement("article");row.className="history-row history-file-row";
+const left=document.createElement("div"),b=document.createElement("b"),s=document.createElement("small"),actions=document.createElement("div");
+b.textContent=x.title||x.fileName||"عملية";s.textContent=(x.date||"")+" • "+(x.type||"")+(x.fileName?" • "+x.fileName:"")+(x.size?" • "+formatBytes(x.size):"");
+left.append(b,s);actions.className="history-actions";
+if(x.fileId){const open=document.createElement("button"),again=document.createElement("button");open.className="ghost-btn";again.className="primary-btn";open.textContent="فتح الملف";again.textContent="إعادة تنزيل";open.onclick=()=>useActivityFile(x.fileId,false);again.onclick=()=>useActivityFile(x.fileId,true);actions.append(open,again)}
+else{const note=document.createElement("small");note.className="history-no-file";note.textContent="سجل نشاط فقط — لم يُحفظ ملف لهذه العملية";actions.append(note)}
+row.append(left,actions);box.append(row);
+});
+$("clearGlobalHistory").onclick=async()=>{
+if(!confirm("سيتم حذف سجل العمليات والملفات المحفوظة على هذا الجهاز. هل تريد المتابعة؟"))return;
+localStorage.removeItem(ACTIVITY_KEY);
+try{const db=await openActivityDB();await new Promise((resolve,reject)=>{const tx=db.transaction("files","readwrite");tx.objectStore("files").clear();tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)});db.close()}catch(_){}
+showGlobalHistory();
+};
 }
-function recordActivity(title,type){const key="synex-global-history";let list=[];try{list=JSON.parse(localStorage.getItem(key)||"[]")}catch(_){}list.unshift({title,type,date:new Date().toLocaleString(),ts:Date.now()});localStorage.setItem(key,JSON.stringify(list.slice(0,100)))}
+const ACTIVITY_KEY="synex-global-history";
+function readActivity(){try{return JSON.parse(localStorage.getItem(ACTIVITY_KEY)||"[]")}catch(_){return[]}}
+function writeActivity(list){localStorage.setItem(ACTIVITY_KEY,JSON.stringify(list.slice(0,2000)))}
+function recordActivity(title,type){const list=readActivity();list.unshift({id:"act-"+Date.now()+"-"+Math.random().toString(36).slice(2,8),title,type,date:new Date().toLocaleString(),ts:Date.now()});writeActivity(list)}
+function openActivityDB(){
+return new Promise((resolve,reject)=>{
+if(!window.indexedDB){reject(Error("التخزين المحلي للملفات غير مدعوم"));return}
+const req=indexedDB.open("synex-activity-files",1);
+req.onupgradeneeded=()=>{const db=req.result;if(!db.objectStoreNames.contains("files"))db.createObjectStore("files")};
+req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error||Error("تعذر فتح مخزن الملفات"));
+});
+}
+async function saveActivityFile(title,type,fileName,blob){
+const id="file-"+Date.now()+"-"+Math.random().toString(36).slice(2,9),db=await openActivityDB();
+await new Promise((resolve,reject)=>{const tx=db.transaction("files","readwrite");tx.objectStore("files").put({blob,fileName,type:blob.type||"application/octet-stream",savedAt:Date.now()},id);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error||Error("تعذر حفظ الملف"))});
+db.close();
+const list=readActivity();list.unshift({id,title,type,date:new Date().toLocaleString(),ts:Date.now(),fileId:id,fileName,size:blob.size});
+writeActivity(list);return id;
+}
+async function getActivityFile(id){
+const db=await openActivityDB();
+const value=await new Promise((resolve,reject)=>{const tx=db.transaction("files","readonly"),req=tx.objectStore("files").get(id);req.onsuccess=()=>resolve(req.result||null);req.onerror=()=>reject(req.error)});
+db.close();return value;
+}
+async function useActivityFile(id,download){
+try{
+const item=await getActivityFile(id);if(!item||!item.blob){toast("الملف غير موجود في التخزين المحلي؛ ربما تم مسح بيانات المتصفح.");return}
+const url=URL.createObjectURL(item.blob),a=document.createElement("a");a.href=url;
+if(download){a.download=item.fileName||"SYNEX-file";a.click();toast("بدأت إعادة تنزيل الملف")}
+else{a.target="_blank";a.rel="noopener";a.click();toast("تم فتح الملف في تبويب جديد")}
+setTimeout(()=>URL.revokeObjectURL(url),120000);
+}catch(e){toast("تعذر فتح الملف: "+(e.message||"خطأ في التخزين"))}
+}
 $("sideHome").addEventListener("click",showHome);$("sideHelp").addEventListener("click",showHelp);$("sideHistory").addEventListener("click",showGlobalHistory);
 function renderQuickDrop(){
 const params=new URLSearchParams(location.search),target=params.get("quickdrop")||"";
@@ -77,6 +124,7 @@ sendMessage({type:"complete",count:files.length});status("اكتمل الإرس�
 }
 function addReceivedFile(f,blob){
 const url=URL.createObjectURL(blob);receivedUrls.push(url);receivedFiles.push({name:f.name,size:f.size,mime:f.mime,blob,url});
+saveActivityFile(f.name,"QuickDrop received",f.name,blob).catch(e=>toast("استُلم الملف لكن تعذر حفظه في السجل: "+e.message));
 $("qdResults").classList.remove("hidden");
 const row=document.createElement("article");row.className="qd-download-card";
 if((f.mime||"").startsWith("image/")){const img=document.createElement("img");img.className="qd-thumb";img.src=url;img.alt=f.name;row.append(img)}
@@ -244,12 +292,11 @@ $("speechStatus").textContent="جارٍ تسجيل الصوت. اترك التب
 };
 }
 const HISTORY_KEY="synex-compression-history-v1";
-function retentionCleanup(){const keys=["synex-compression-history-v1","synex-global-history"];const age=2*86400000;keys.forEach(k=>{try{const a=JSON.parse(localStorage.getItem(k)||"[]"),now=Date.now();const keep=a.filter(x=>{const t=Number(x.ts)||Date.parse(x.date||"");return !Number.isFinite(t)||now-t<age});localStorage.setItem(k,JSON.stringify(keep))}catch(_){}})}
-retentionCleanup();
+function retentionCleanup(){/* لا نحذف السجل تلقائياً؛ يبقى حتى يختار المستخدم مسحه. */}
 function getHistory(){try{return JSON.parse(localStorage.getItem(HISTORY_KEY)||"[]")}catch(_){return[]}}
 function saveHistory(item){const h=getHistory();h.unshift({...item,ts:Date.now()});localStorage.setItem(HISTORY_KEY,JSON.stringify(h.slice(0,25)))}
 function renderHistory(){const h=getHistory(),el=$("historyList");if(!el)return;if(!h.length){el.innerHTML='<p class="compression-note">لا توجد عمليات سابقة بعد.</p>';return}el.innerHTML=h.map(x=>'<div class="history-row"><div><b></b><small></small></div><strong></strong></div>').join("");[...el.children].forEach((node,i)=>{node.children[0].children[0].textContent=h[i].name;node.children[0].children[1].textContent=h[i].date+" • "+h[i].kind;node.children[1].textContent=h[i].result})}
-function addHistory(name,kind,result){saveHistory({name,kind,result,date:new Date().toLocaleString()});recordActivity(name,kind);renderHistory()}
+function addHistory(name,kind,result,blob){saveHistory({name,kind,result,date:new Date().toLocaleString()});if(blob)saveActivityFile(name,kind,name,blob).catch(e=>{recordActivity(name,kind);toast("حُفظ السجل دون الملف: "+e.message)});else recordActivity(name,kind);renderHistory()}
 function formatBytes(n){if(!Number.isFinite(n))return"—";const u=["B","KB","MB","GB","TB"];let i=0;while(n>=1024&&i<u.length-1){n/=1024;i++}return n.toFixed(i?1:0)+" "+u[i]}
 function suggestion(files){const f=files[0],ext=(f.name.split(".").pop()||"").toLowerCase(),already=["jpg","jpeg","png","webp","gif","mp4","mp3","zip","gz","pdf","7z","rar","avif"].includes(ext);if(already)return{level:1,label:"ضغط خفيف",reason:"هذا النوع مضغوط مسبقاً غالباً؛ الضغط القوي قد يستهلك وقتاً دون توفير واضح."};if(["txt","csv","json","xml","html","js","css","svg","log"].includes(ext))return{level:9,label:"أقصى ضغط",reason:"الملفات النصية غالباً تستفيد من الضغط الأقوى."};if(["docx","xlsx","pptx"].includes(ext))return{level:3,label:"ضغط خفيف",reason:"هذه الصيغ تحتوي ضغطاً داخلياً بالفعل."};return{level:6,label:"متوازن",reason:"اقتراح عام؛ يمكنك تغيير المستوى وتجربة النتيجة."}}
 function renderCompressor(){
@@ -345,7 +392,7 @@ $("runCompress").onclick=async()=>{if(!selected.length)return;$("runCompress").d
 try{
 if(mode==="single"){const f=selected[0];if(!window.fflate)throw Error("مكتبة الضغط لم تُحمّل.");if(f.size>180*1024*1024)throw Error("لملف أكبر من 180MB استخدم ZIP/خدمة تدعم الحفظ المتدفق لاحقاً؛ هذا الإصدار يقيّد الملف لحماية الذاكرة.");const data=new Uint8Array(await f.arrayBuffer());const compressed=fflate.gzipSync(data,{level:+$("compressionLevel").value});resultBlob=new Blob([compressed],{type:"application/gzip"});resultName=f.name+".gz";$("progressBar").style.width="100%";$("progressStatus").textContent="اكتمل ضغط الملف."}
 else {if(!window.fflate)throw Error("مكتبة ZIP لم تُحمّل.");const total=selected.reduce((a,f)=>a+f.size,0);if(total>350*1024*1024)throw Error("إجمالي الملفات يتجاوز 350MB في هذا الإصدار التجريبي لحماية ذاكرة المتصفح.");const files={};let done=0;for(let i=0;i<selected.length;i++){const f=selected[i];const path=(f.webkitRelativePath||f.name).replace(/^\/+/, "");files[path]=new Uint8Array(await f.arrayBuffer());done+=f.size;$("progressBar").style.width=Math.round(done/Math.max(total,1)*90)+"%";$("progressStatus").textContent="تجهيز "+(i+1)+" من "+selected.length+" • "+f.name}const zipped=fflate.zipSync(files,{level:+$("zipLevel").value});resultBlob=new Blob([zipped],{type:"application/zip"});resultName="SYNEX-Archive-"+Date.now()+".zip";$("progressBar").style.width="100%";$("progressStatus").textContent="اكتمل إنشاء ZIP."}
-const before=selected.reduce((a,f)=>a+f.size,0),after=resultBlob.size,ratio=(1-after/Math.max(before,1))*100;$("originalSize").textContent=formatBytes(before);$("compressedSize").textContent=formatBytes(after);$("savedPercent").textContent=(ratio>=0?ratio.toFixed(1)+"% توفير":Math.abs(ratio).toFixed(1)+"% زيادة");$("resultStats").classList.remove("hidden");$("downloadResult").classList.remove("hidden");$("runCompress").classList.add("hidden");$("progressStatus").textContent+=" الملف جاهز، راجع معاينة الصورة ثم اضغط تنزيل.";addHistory(resultName,mode==="single"?"GZIP":"ZIP",formatBytes(before)+" ← "+formatBytes(after));toast("تم تجهيز الملف. التنزيل بانتظار ضغط الزر.");
+const before=selected.reduce((a,f)=>a+f.size,0),after=resultBlob.size,ratio=(1-after/Math.max(before,1))*100;$("originalSize").textContent=formatBytes(before);$("compressedSize").textContent=formatBytes(after);$("savedPercent").textContent=(ratio>=0?ratio.toFixed(1)+"% توفير":Math.abs(ratio).toFixed(1)+"% زيادة");$("resultStats").classList.remove("hidden");$("downloadResult").classList.remove("hidden");$("runCompress").classList.add("hidden");$("progressStatus").textContent+=" الملف جاهز، راجع معاينة الصورة ثم اضغط تنزيل.";addHistory(resultName,mode==="single"?"GZIP":"ZIP",formatBytes(before)+" ← "+formatBytes(after),resultBlob);toast("تم تجهيز الملف. التنزيل بانتظار ضغط الزر.");
 }catch(e){$("progressStatus").textContent="تعذر إكمال الضغط: "+e.message;toast(e.message);$("runCompress").disabled=false}
 };
 $("downloadResult").onclick=()=>{if(!resultBlob)return;const url=URL.createObjectURL(resultBlob),a=document.createElement("a");a.href=url;a.download=resultName;a.click();setTimeout(()=>URL.revokeObjectURL(url),60000);toast("بدأ تنزيل "+resultName)};
