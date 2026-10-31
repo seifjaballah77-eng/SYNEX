@@ -1,16 +1,13 @@
 (() => {
 const $=id=>document.getElementById(id), dialog=$("loginDialog"), toastEl=$("toast");
-let toastTimer,isGuest=false,isSignedIn=false,supabaseClient=null;
+let toastTimer,isGuest=true,isSignedIn=false,supabaseClient=null;
 function toast(m){toastEl.textContent=m;toastEl.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>toastEl.classList.remove("show"),3000)}
-const cfg=window.SYNEX_CONFIG||{};
-if(window.supabase&&cfg.supabaseUrl&&cfg.supabaseAnonKey){supabaseClient=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey);supabaseClient.auth.getSession().then(({data})=>{if(data.session)showSignedIn(data.session.user)})}
-function showSignedIn(user){isSignedIn=true;isGuest=false;retentionCleanup();dialog.close();$("openLogin").classList.add("hidden");$("accountButton").classList.remove("hidden");$("accountButton").textContent=(user.email||"S").slice(0,1).toUpperCase();toast("تم تسجيل الدخول بنجاح")}
-function openLogin(){$("authHint").classList.toggle("hidden",!!supabaseClient);dialog.showModal()}
-$("openLogin").addEventListener("click",openLogin);
-$("startNow").addEventListener("click",()=>{if(!isGuest&&!isSignedIn)openLogin();else openTool("compressor")});
-function continueAsGuest(){isGuest=true;retentionCleanup();$("guestWarning").classList.remove("hidden");dialog.close();openTool("compressor");toast("وضع الزائر — تُحفظ بيانات النشاط محلياً لمدة 48 ساعة") }
-$("guestSkip").addEventListener("click",continueAsGuest);$("dialogSkip").addEventListener("click",continueAsGuest);
-$("googleSignIn").addEventListener("click",async()=>{if(!supabaseClient){$("authHint").classList.remove("hidden");toast("تسجيل Google يحتاج إعداد Supabase OAuth أولاً");return}const {error}=await supabaseClient.auth.signInWithOAuth({provider:"google",options:{redirectTo:location.origin+location.pathname}});if(error)toast("تعذر بدء تسجيل الدخول: "+error.message)});
+// SYNEX يعمل مباشرة دون حساب أو تسجيل دخول.
+// سجل النشاط والعمليات يحتفظ بهما هذا الجهاز لمدة 48 ساعة فقط.
+$("openLogin").classList.add("hidden");
+$("accountButton").classList.add("hidden");
+$("startNow").addEventListener("click",()=>openTool("compressor"));
+$("guestWarning").classList.remove("hidden");
 $("themeToggle").addEventListener("click",()=>{document.body.classList.toggle("light");localStorage.setItem("synex-theme",document.body.classList.contains("light")?"light":"dark")});
 if(localStorage.getItem("synex-theme")==="light")document.body.classList.add("light");
 const info={quickdrop:["QuickDrop","نقل الملفات","نقل الملفات بين الأجهزة يحتاج إلى خدمة نقل واتصال مخصصة."],screentext:["ScreenText","استخراج النصوص والتصميم","استخراج النصوص من الصور وتحريرها قيد التطوير."],voicetype:["VoiceType","تحويل الصوت إلى نص","تحويل الكلام والتسجيلات إلى نص قيد التطوير."]};
@@ -63,7 +60,7 @@ $("copyVoice").onclick=async()=>{try{await navigator.clipboard.writeText($("voic
 $("saveVoice").onclick=()=>downloadText($("voiceText").value,"SYNEX-Voice.txt");
 }
 const HISTORY_KEY="synex-compression-history-v1";
-function retentionCleanup(){const keys=["synex-compression-history-v1","synex-global-history"];const age=(isSignedIn?120:2)*86400000;keys.forEach(k=>{try{const a=JSON.parse(localStorage.getItem(k)||"[]"),now=Date.now();const keep=a.filter(x=>{const t=Number(x.ts)||Date.parse(x.date||"");return !Number.isFinite(t)||now-t<age});localStorage.setItem(k,JSON.stringify(keep))}catch(_){}})}
+function retentionCleanup(){const keys=["synex-compression-history-v1","synex-global-history"];const age=2*86400000;keys.forEach(k=>{try{const a=JSON.parse(localStorage.getItem(k)||"[]"),now=Date.now();const keep=a.filter(x=>{const t=Number(x.ts)||Date.parse(x.date||"");return !Number.isFinite(t)||now-t<age});localStorage.setItem(k,JSON.stringify(keep))}catch(_){}})}
 retentionCleanup();
 function getHistory(){try{return JSON.parse(localStorage.getItem(HISTORY_KEY)||"[]")}catch(_){return[]}}
 function saveHistory(item){const h=getHistory();h.unshift({...item,ts:Date.now()});localStorage.setItem(HISTORY_KEY,JSON.stringify(h.slice(0,25)))}
