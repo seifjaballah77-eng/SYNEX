@@ -249,3 +249,47 @@ body.light .vs-fields input:not([type=color]):not([type=range]),body.light .vs-f
 .side-install span{font-size:18px;line-height:20px}.side-install small{font:700 9px/13px Alexandria,system-ui,sans-serif}
 .install-section{scroll-margin-top:88px}
 @media(max-width:760px){.app-sidebar{justify-content:flex-start;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}.app-sidebar::-webkit-scrollbar{display:none}.side-tool.side-install{height:44px;flex-basis:44px;min-width:44px}}
+
+
+/* Compact install shortcut beside the appearance toggle */
+.install-top-btn{height:34px;min-width:68px;padding:0 10px;display:inline-flex;align-items:center;justify-content:center;gap:5px;border:1px solid #38e8ff66;border-radius:10px;background:#38e8ff12;color:var(--cyan);font:700 11px Alexandria,system-ui,sans-serif;white-space:nowrap}
+.install-top-btn:hover{background:#38e8ff22;box-shadow:0 0 14px #38e8ff25}
+.install-section{padding:12px 0 70px;scroll-margin-top:88px}
+.install-back{margin:0 0 16px}
+@media(max-width:420px){.top-actions{gap:6px}.install-top-btn{height:32px;min-width:58px;padding:0 7px;font-size:10px}.icon-btn{width:36px;height:36px}}
+/* High-contrast neon palette for the light theme */
+body.light{color-scheme:light;--bg:#f3f7ff;--panel:#ffffff;--panel2:#edf3ff;--text:#18243b;--muted:#52627d;--line:#d4deef;--cyan:#007f9f;--violet:#6846c8;--pink:#bd348d;--shadow:0 16px 44px #263b6320}
+body.light .topbar{background:#f3f7ffeF;border-bottom-color:#dce6f5}
+body.light .brand,body.light h1,body.light h2,body.light h3,body.light h4,body.light strong,body.light b,body.light label{color:var(--text)}
+body.light p,body.light small,body.light .tool-desc,body.light .section-hint,body.light .install-note,body.light .compression-note,body.light .picked-file,body.light .progress-wrap small,body.light footer{color:var(--muted)}
+body.light .neon-text,body.light .section-kicker,body.light .eyebrow,body.light .tool-link,body.light footer span:first-child,body.light .help-grid b,body.light .info-grid b,body.light .install-guides b,body.light .vs-preview-head b,body.light .vs-output>b,body.light .vs-section-title b,body.light .qd-share>b,body.light .qd-receiver>b{color:var(--cyan)}
+body.light .tool-tag{color:#6650a6}
+body.light .tool-card{background:linear-gradient(145deg,#fff,#edf4ff);border-color:#d4e0f2}
+body.light .compress-panel,body.light .level-box,body.light .help-grid article,body.light .info-grid>div,body.light .install-guides article,body.light .vs-preview-card{background:#fff;border-color:var(--line)}
+body.light .app-sidebar{background:#ffffffed;border-color:#d4deef;box-shadow:0 12px 36px #263b6320}
+body.light .side-tool,body.light .side-brand{color:#52627d}
+body.light .side-tool:hover,body.light .side-tool.active{color:var(--cyan);background:#00a6c414;border-color:#00a6c455}
+body.light .icon-btn,body.light .avatar-btn,body.light .ghost-btn,body.light .back-btn{background:#fff;color:#33425e;border-color:#cbd8ec}
+body.light input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),body.light textarea,body.light select{background:#fff!important;color:#17243b!important;border-color:#cbd8ec}
+body.light input::placeholder,body.light textarea::placeholder{color:#71809a}
+body.light .mode-switch{background:#e8effb}
+body.light .mode-btn{color:#52627d}
+body.light .mode-btn.active{color:#fff}
+body.light .file-drop{background:#f7fbff;border-color:#9aaccb}
+body.light .file-drop:hover{background:#e9faff;border-color:var(--cyan)}
+body.light .qd-status,body.light .qd-file,body.light .qd-download,body.light .history-file-row,body.light .voice-live-status,body.light .voice-command-help,body.light .vs-recorder,body.light .vs-output{background:#f8fbff;border-color:var(--line)}
+body.light .qd-share,body.light .qd-receiver,body.light .qd-results{background:#eafaff;border-color:#8acbd9}
+body.light .install-panel{background:linear-gradient(120deg,#e5faff,#f0edff 70%,#fff0fa);border-color:#9edce8}
+body.light .install-icon{color:#007f9f;background:#d9f8ff;border-color:#72cddd}
+body.light .toast{background:#fff;color:#17243b;border-color:#b9c9e1;box-shadow:0 8px 28px #263b6325}
+body.light .dialog::backdrop{background:#24324d88}
+body.light .dialog{background:#fff;color:#17243b;border-color:#ccd8eb}
+body.light .vs-preview-card video{background:#e8edf5}
+body.light .tl-diff{background:#f4f7fc;border-color:var(--line)}
+body.light .tl-same{color:#53627c}
+body.light .tl-added{color:#12683d}
+body.light .tl-removed{color:#a72c45}
+body.light .qd-request{background:#fff8e8;border-color:#e5c77e}
+body.light .qd-request>b{color:#8b5c00}
+body.light .voice-live-status.recording{color:#12683d;background:#e9fff4}
+body.light .history-no-file{color:#687792}
