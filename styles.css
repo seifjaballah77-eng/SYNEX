@@ -49,3 +49,19 @@
 #qrCanvas canvas,#qrCanvas img{max-width:100%;height:auto}
 #qrInput{width:100%;padding:13px;border:1px solid var(--line);border-radius:11px;background:#080b17;color:var(--text);font:13px/1.8 Alexandria,system-ui,sans-serif;resize:vertical}
 @media(max-width:760px){.preview-stage{height:260px}.history-row{align-items:flex-start}.history-row>strong{white-space:normal;text-align:left}}
+
+/* SYNEX professional workspace shell */
+.app-sidebar{position:fixed;z-index:20;top:50%;left:18px;transform:translateY(-50%);width:58px;min-height:390px;padding:10px 7px;display:flex;flex-direction:column;align-items:center;gap:9px;border:1px solid var(--line);border-radius:20px;background:#10162beF;box-shadow:0 15px 45px #0006;backdrop-filter:blur(18px)}
+.side-brand,.side-tool{width:42px;height:42px;flex:0 0 42px;border-radius:13px;border:1px solid transparent;background:transparent;color:var(--muted);font-size:20px;display:grid;place-items:center;transition:.18s}
+.side-brand{background:#38e8ff12;border-color:#38e8ff55;color:var(--cyan);font-weight:800}
+.side-tool:hover,.side-tool.active{background:#38e8ff12;border-color:#38e8ff55;color:var(--cyan);box-shadow:0 0 16px #38e8ff18}
+.side-divider{width:28px;height:1px;background:var(--line);margin:2px 0}
+.side-spacer{flex:1;min-height:14px}
+body{padding-left:80px}
+main{width:min(1120px,calc(100% - 36px))}
+.help-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:20px}
+.help-grid article{padding:17px;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
+.help-grid b{color:var(--cyan);font-size:13px}
+.help-grid p{font-size:12px;line-height:1.9;margin-bottom:0}
+body.light .app-sidebar{background:#ffffffed}
+@media(max-width:760px){body{padding-left:0;padding-bottom:76px}.app-sidebar{top:auto;bottom:10px;left:50%;transform:translateX(-50%);width:min(94vw,520px);min-height:0;height:60px;flex-direction:row;justify-content:space-around;padding:7px;border-radius:18px;gap:3px}.side-brand,.side-tool{width:40px;height:40px;flex-basis:40px;font-size:17px}.side-divider{width:1px;height:28px;margin:0}.side-spacer{display:none}.help-grid{grid-template-columns:1fr}main{width:min(100% - 28px,560px)}}
