@@ -1,0 +1,1 @@
+document.getElementById("open").addEventListener("click",()=>{chrome.tabs.create({url:"https://seifjaballah77-eng.github.io/SYNEX/?tool=voicetype"});window.close();});
