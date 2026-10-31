@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "SYNEX Voice",
+  "short_name": "SYNEX Voice",
+  "version": "1.0.0",
+  "description": "افتح استوديو تحويل الكلام والصوت في SYNEX مباشرة من شريط Chrome.",
+  "action": {
+    "default_title": "فتح SYNEX Voice",
+    "default_popup": "popup.html"
+  },
+  "icons": {
+    "128": "icon.svg"
+  }
+}
