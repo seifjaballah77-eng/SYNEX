@@ -203,19 +203,29 @@ const commands=[
 [/^(?:افتح علامه تنصيص)$/,"“"],
 [/^(?:اغلق علامه تنصيص)$/,"”"]
 ];
+function removeRepeatedWords(text){
+const parts=String(text||"").split(/(\s+)/),out=[];let last="";
+for(const part of parts){
+if(!part||/^\s+$/.test(part)){out.push(part);continue}
+const key=normalize(part.replace(/[،,؛;.!؟?()“”"]/g,""));
+if(key&&key===last)continue;
+if(key)last=key;out.push(part);
+}
+return out.join("").replace(/\s+([،,؛;.!؟?])/g,"$1");
+}
 function convertCommands(text){
-let out=text;
+let out=removeRepeatedWords(text);
 const replacements=[
 [/(?:افتح|حط|ضع)\s+(?:ال)?قوس(?:\s+فتح)?/gi,"("],
 [/(?:اغلق|اقفل|سكر)\s+(?:ال)?قوس/gi,")"],
-[/علامه\s+(?:ال)?استفهام/gi,"؟"],
+[/علام(?:ة|ه)\s+(?:ال)?استفهام/gi,"؟"],
 [/فاصله(?:\s+عربيه)?/gi,"،"],
 [/نقطه(?:\s+توقف)?/gi,"."],
-[/علامه\s+تعجب/gi,"!"],
+[/علام(?:ة|ه)\s+تعجب/gi,"!"],
 [/(?:سطر\s+جديد|انزل\s+سطر)/gi,"\n"],
 [/(?:نقطتان|نقطتين)/gi,":"],
-[/افتح\s+علامه\s+تنصيص/gi,"“"],
-[/اغلق\s+علامه\s+تنصيص/gi,"”"]
+[/افتح\s+علام(?:ة|ه)\s+تنصيص/gi,"“"],
+[/اغلق\s+علام(?:ة|ه)\s+تنصيص/gi,"”"]
 ];
 for(const [pattern,value] of replacements)out=out.replace(pattern,value);
 return out;
@@ -225,13 +235,16 @@ else{
 rec=new SR();rec.continuous=true;rec.interimResults=true;rec.maxAlternatives=1;
 rec.onstart=()=>{isListening=true;$("voiceStart").disabled=true;$("voiceStop").disabled=false;status("أستمع إليك الآن...",true)};
 rec.onresult=e=>{
-let interim="";
-for(let i=e.resultIndex;i<e.results.length;i++){
-const result=e.results[i],spoken=result[0].transcript.trim();
-if(result.isFinal&&spoken){const converted=convertCommands(spoken);finalText+=(finalText&&!/[\s\n]$/.test(finalText)?" ":"")+converted;$("voiceText").value=finalText;}
-else if(spoken)interim+=spoken+" ";
+const finalParts=[],interimParts=[];
+/* إعادة بناء النص من النتائج الحالية تمنع إلحاق المقطع نفسه أكثر من مرة */
+for(let i=0;i<e.results.length;i++){
+const result=e.results[i],spoken=(result[0]&&result[0].transcript||"").trim();
+if(!spoken)continue;
+if(result.isFinal)finalParts.push(spoken);else interimParts.push(spoken);
 }
-$("voiceText").value=finalText+(interim?" "+interim:"");
+finalText=convertCommands(finalParts.join(" "));
+const interim=removeRepeatedWords(interimParts.join(" "));
+$("voiceText").value=finalText+(interim?(finalText&&!/[\s\n]$/.test(finalText)?" ":"")+interim:"");
 };
 rec.onerror=e=>{status("مشكلة في الميكروفون أو خدمة التعرف: "+e.error);};
 rec.onend=()=>{isListening=false;$("voiceStart").disabled=false;$("voiceStop").disabled=true;if($("voiceStatus").querySelector("span").textContent.includes("أستمع"))status("توقف الاستماع.");};
