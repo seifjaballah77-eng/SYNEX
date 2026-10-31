@@ -40,7 +40,7 @@ $("toolContent").innerHTML='<div class="tool-workspace"><span class="section-kic
 const box=$("globalHistory");if(!items.length){box.textContent="لا توجد عمليات مسجلة بعد.";return}
 items.forEach(x=>{const row=document.createElement("div");row.className="history-row";const left=document.createElement("div"),b=document.createElement("b"),s=document.createElement("small");b.textContent=x.title;s.textContent=x.date+" • "+x.type;left.append(b,s);row.append(left);box.append(row)});
 }
-function recordActivity(title,type){const key="synex-global-history";let list=[];try{list=JSON.parse(localStorage.getItem(key)||"[]")}catch(_){}list.unshift({title,type,date:new Date().toLocaleString()});localStorage.setItem(key,JSON.stringify(list.slice(0,100)))}
+function recordActivity(title,type){const key="synex-global-history";let list=[];try{list=JSON.parse(localStorage.getItem(key)||"[]")}catch(_){}list.unshift({title,type,date:new Date().toLocaleString(),ts:Date.now()});localStorage.setItem(key,JSON.stringify(list.slice(0,100)))}
 $("sideHome").addEventListener("click",showHome);$("sideHelp").addEventListener("click",showHelp);$("sideHistory").addEventListener("click",showGlobalHistory);
 function renderQuickDrop(){
 $("toolContent").innerHTML='<div class="tool-workspace"><span class="section-kicker">QUICKDROP</span><h2>نقل الملفات</h2><div class="compress-panel"><div class="placeholder-panel"><b>النقل المباشر بين الأجهزة غير مفعّل بعد</b><p>لإنجازه بشكل حقيقي نحتاج خدمة signaling واتصال WebRTC، وقد نحتاج TURN حتى يعمل عبر شبكات مختلفة. لن أعرض زر إرسال وهمياً قبل إعداد هذه الخدمة.</p></div></div></div>';
@@ -63,10 +63,10 @@ $("copyVoice").onclick=async()=>{try{await navigator.clipboard.writeText($("voic
 $("saveVoice").onclick=()=>downloadText($("voiceText").value,"SYNEX-Voice.txt");
 }
 const HISTORY_KEY="synex-compression-history-v1";
-function retentionCleanup(){const keys=["synex-compression-history-v1","synex-global-history"];const age=(isSignedIn?120:2)*86400000;keys.forEach(k=>{try{const a=JSON.parse(localStorage.getItem(k)||"[]"),now=Date.now();const keep=a.filter(x=>{const t=Date.parse(x.date||"");return !Number.isFinite(t)||now-t<age});localStorage.setItem(k,JSON.stringify(keep))}catch(_){}})}
+function retentionCleanup(){const keys=["synex-compression-history-v1","synex-global-history"];const age=(isSignedIn?120:2)*86400000;keys.forEach(k=>{try{const a=JSON.parse(localStorage.getItem(k)||"[]"),now=Date.now();const keep=a.filter(x=>{const t=Number(x.ts)||Date.parse(x.date||"");return !Number.isFinite(t)||now-t<age});localStorage.setItem(k,JSON.stringify(keep))}catch(_){}})}
 retentionCleanup();
 function getHistory(){try{return JSON.parse(localStorage.getItem(HISTORY_KEY)||"[]")}catch(_){return[]}}
-function saveHistory(item){const h=getHistory();h.unshift(item);localStorage.setItem(HISTORY_KEY,JSON.stringify(h.slice(0,25)))}
+function saveHistory(item){const h=getHistory();h.unshift({...item,ts:Date.now()});localStorage.setItem(HISTORY_KEY,JSON.stringify(h.slice(0,25)))}
 function renderHistory(){const h=getHistory(),el=$("historyList");if(!el)return;if(!h.length){el.innerHTML='<p class="compression-note">لا توجد عمليات سابقة بعد.</p>';return}el.innerHTML=h.map(x=>'<div class="history-row"><div><b></b><small></small></div><strong></strong></div>').join("");[...el.children].forEach((node,i)=>{node.children[0].children[0].textContent=h[i].name;node.children[0].children[1].textContent=h[i].date+" • "+h[i].kind;node.children[1].textContent=h[i].result})}
 function addHistory(name,kind,result){saveHistory({name,kind,result,date:new Date().toLocaleString()});recordActivity(name,kind);renderHistory()}
 function formatBytes(n){if(!Number.isFinite(n))return"—";const u=["B","KB","MB","GB","TB"];let i=0;while(n>=1024&&i<u.length-1){n/=1024;i++}return n.toFixed(i?1:0)+" "+u[i]}
