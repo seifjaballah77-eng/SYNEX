@@ -289,8 +289,8 @@ $("toolContent").innerHTML=[
 '<div class="vs-layout"><section class="vs-preview-card"><div class="vs-preview-head"><b>معاينة الفيديو</b><span id="vsMeta">لم يتم اختيار فيديو</span></div><video id="vsPreview" controls playsinline></video><div class="vs-preview-tools"><button class="ghost-btn" id="vsSnapshot" disabled>التقاط صورة من الإطار</button><button class="ghost-btn" id="vsSeekStart" disabled>تحديد البداية من المشغل</button><button class="ghost-btn" id="vsSeekEnd" disabled>تحديد النهاية من المشغل</button></div><div class="vs-output hidden" id="vsOutput"><b>النتيجة الجاهزة</b><video id="vsResultPreview" controls playsinline></video><a id="vsDownload" class="primary-btn" download>تنزيل النتيجة</a></div></section>',
 '<section class="compress-panel vs-panel"><div class="vs-section-title"><b>1 — ملف الفيديو</b><small>اختر ملفاً واحداً للتحرير</small></div><label class="file-drop" for="vsFile"><span class="drop-symbol">▶</span><strong>اختر فيديو من جهازك</strong><small>MP4 · WEBM · MOV · MKV · AVI وغيرها</small></label><input id="vsFile" type="file" accept="video/*,.mp4,.webm,.mov,.mkv,.avi,.m4v" class="hidden"><div class="picked-file hidden" id="vsPicked"></div>',
 '<div class="vs-section-title"><b>2 — القص والتصدير</b><small>حدد المقطع والصيغة والجودة</small></div><div class="vs-fields"><label>من الثانية<input id="vsStart" type="number" min="0" step="0.1" value="0"></label><label>إلى الثانية<input id="vsEnd" type="number" min="0" step="0.1" placeholder="نهاية الفيديو"></label><label>صيغة الإخراج<select id="vsFormat"><option value="mp4">MP4</option><option value="webm">WEBM</option><option value="gif">GIF متحرك</option><option value="mp3">MP3 صوت فقط</option><option value="wav">WAV صوت فقط</option></select></label><label>الدقة<select id="vsResolution"><option value="original">الأصلية</option><option value="360">360p</option><option value="480">480p</option><option value="720" selected>720p</option><option value="1080">1080p</option></select></label><label>الجودة<select id="vsQuality"><option value="18">عالية جداً</option><option value="23" selected>متوازنة</option><option value="28">حجم أصغر</option><option value="32">ضغط قوي</option></select></label><label>سرعة الفيديو<select id="vsSpeed"><option value="0.5">0.5× بطيء</option><option value="0.75">0.75×</option><option value="1" selected>1× طبيعي</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option><option value="2">2× سريع</option></select></label></div>',
-'<div class="vs-section-title"><b>3 — الصورة والحركة</b><small>تأثيرات لونية وتحكم بالإطار</small></div><div class="vs-fields"><label>التأثير<select id="vsEffect"><option value="none">بدون تأثير</option><option value="cinema">سينمائي</option><option value="mono">أبيض وأسود</option><option value="sepia">سيبيا قديم</option><option value="vivid">ألوان قوية</option><option value="neon">Neon Glow</option><option value="blur">تمويه Blur</option><option value="sharp">زيادة الحدة Sharpen</option></select></label><label>التدوير<select id="vsRotate"><option value="0">0°</option><option value="90">90°</option><option value="180">180°</option><option value="270">270°</option></select></label><label>القلب<select id="vsFlip"><option value="none">بدون</option><option value="h">أفقي</option><option value="v">عمودي</option><option value="both">أفقي وعمودي</option></select></label><label>التقريب / التبعيد<select id="vsZoom"><option value="0.8">0.8× تبعيد</option><option value="0.9">0.9×</option><option value="1" selected>1× طبيعي</option><option value="1.1">1.1×</option><option value="1.25">1.25×</option><option value="1.5">1.5× تقريب</option></select></label><label>السطوع<input id="vsBrightness" type="range" min="-0.2" max="0.2" value="0" step="0.02"></label><label>التباين<input id="vsContrast" type="range" min="0.5" max="1.8" value="1" step="0.05"></label><label>تشبع الألوان<input id="vsSaturation" type="range" min="0" max="2" value="1" step="0.05"></label></div><div class="vs-checks"><label><input id="vsMute" type="checkbox"> كتم صوت الفيديو الأصلي</label><label><input id="vsFade" type="checkbox"> تدرّج دخول وخروج الصورة</label></div>',
-'<div class="vs-section-title"><b>4 — الكتابة والعلامة المائية</b><small>نص ملوّن يظهر في الوقت الذي تحدده</small></div><label>الكلام الذي تريد وضعه على الفيديو<textarea id="vsText" rows="2" placeholder="اكتب عنواناً أو تعليقاً أو اسمك..."></textarea></label><div class="vs-fields"><label>لون الكلام<input id="vsTextColor" type="color" value="#ffffff"></label><label>لون الحدود<input id="vsTextStroke" type="color" value="#111111"></label><label>حجم الخط<input id="vsTextSize" type="range" min="18" max="100" value="44"></label><label>مكان النص<select id="vsTextPosition"><option value="bottom">أسفل</option><option value="center">الوسط</option><option value="top">أعلى</option></select></label><label>ظهور النص من<input id="vsTextStart" type="number" min="0" step="0.1" value="0"></label><label>اختفاء النص عند<input id="vsTextEnd" type="number" min="0" step="0.1" placeholder="نهاية المقطع"></label></div><div class="vs-checks"><label><input id="vsTextOutline" type="checkbox" checked> حدود وظل للنص</label><label><input id="vsTextBox" type="checkbox"> خلفية شفافة داكنة خلف الكلام</label></div>',
+'<div class="vs-section-title"><b>3 — الصورة والحركة</b><small>تأثيرات لونية وتحكم بالإطار</small></div><div class="vs-fields"><label>التأثير<select id="vsEffect"><option value="none">بدون تأثير</option><option value="cinema">سينمائي</option><option value="mono">أبيض وأسود</option><option value="sepia">سيبيا قديم</option><option value="vivid">ألوان قوية</option><option value="neon">Neon Glow</option><option value="blur">تمويه Blur</option><option value="denoise">تقليل التشويش</option><option value="sharp">زيادة الحدة Sharpen</option></select></label><label>التدوير<select id="vsRotate"><option value="0">0°</option><option value="90">90°</option><option value="180">180°</option><option value="270">270°</option></select></label><label>القلب<select id="vsFlip"><option value="none">بدون</option><option value="h">أفقي</option><option value="v">عمودي</option><option value="both">أفقي وعمودي</option></select></label><label>التقريب / التبعيد<select id="vsZoom"><option value="0.8">0.8× تبعيد</option><option value="0.9">0.9×</option><option value="1" selected>1× طبيعي</option><option value="1.1">1.1×</option><option value="1.25">1.25×</option><option value="1.5">1.5× تقريب</option></select></label><label>السطوع<input id="vsBrightness" type="range" min="-0.2" max="0.2" value="0" step="0.02"></label><label>التباين<input id="vsContrast" type="range" min="0.5" max="1.8" value="1" step="0.05"></label><label>تشبع الألوان<input id="vsSaturation" type="range" min="0" max="2" value="1" step="0.05"></label></div><div class="vs-checks"><label><input id="vsMute" type="checkbox"> كتم صوت الفيديو الأصلي</label><label><input id="vsFade" type="checkbox"> تدرّج دخول وخروج الصورة</label></div>',
+'<div class="vs-section-title"><b>4 — الكتابة والعلامة المائية</b><small>نص ملوّن يظهر في الوقت الذي تحدده</small></div><label>الكلام الذي تريد وضعه على الفيديو<textarea id="vsText" rows="2" placeholder="اكتب عنواناً أو تعليقاً أو اسمك..."></textarea></label><div class="vs-fields"><label>لون الكلام<input id="vsTextColor" type="color" value="#ffffff"></label><label>لون الحدود<input id="vsTextStroke" type="color" value="#111111"></label><label>حجم الخط<input id="vsTextSize" type="range" min="18" max="100" value="44"></label><label>مكان النص<select id="vsTextPosition"><option value="bottom">أسفل</option><option value="center">الوسط</option><option value="top">أعلى</option></select></label><label>ظهور النص من<input id="vsTextStart" type="number" min="0" step="0.1" value="0"></label><label>اختفاء النص عند<input id="vsTextEnd" type="number" min="0" step="0.1" placeholder="نهاية المقطع"></label></div><div class="vs-checks"><label><input id="vsTextOutline" type="checkbox" checked> حدود وظل للنص</label><label><input id="vsTextBox" type="checkbox"> خلفية شفافة داكنة خلف الكلام</label></div><label>نصوص إضافية بألوان وأوقات مختلفة<textarea id="vsCaptions" rows="4" placeholder="كل سطر بهذا الشكل: البداية | النهاية | #00eaff | النص\n0 | 3 | #ffffff | أهلاً بكم\n3 | 6 | #00eaff | SYNEX"></textarea></label><label class="file-drop" for="vsSrtFile"><span class="drop-symbol">CC</span><strong>أو أضف ملف ترجمة SRT</strong><small>تُقرأ أوقات الترجمة وتُرسم داخل الفيديو</small></label><input id="vsSrtFile" type="file" accept=".srt,text/plain" class="hidden">',
 '<div class="vs-section-title"><b>5 — الموسيقى والتعليق الصوتي</b><small>اختر صوتاً خارجياً أو سجّل صوتك</small></div><label class="file-drop vs-audio-drop" for="vsAudio"><span class="drop-symbol">♫</span><strong>إضافة موسيقى أو تعليق صوتي</strong><small>سيحل الصوت المختار محل الصوت الأصلي؛ أزل خيار الكتم عند عدم إضافة صوت</small></label><input id="vsAudio" type="file" accept="audio/*,.mp3,.wav,.m4a,.ogg,.webm" class="hidden"><div class="picked-file hidden" id="vsAudioInfo"></div><label class="vs-volume">مستوى الصوت الخارجي <input id="vsVolume" type="range" min="0" max="1.5" step="0.05" value="1"></label><div class="vs-recorder"><button class="ghost-btn" id="vsRecord">● تسجيل تعليق صوتي</button><button class="ghost-btn" id="vsStopRecord" disabled>■ إيقاف التسجيل</button><span id="vsRecordStatus">لم يبدأ التسجيل</span></div>',
 '<div class="vs-section-title"><b>6 — دمج عدة مقاطع</b><small>ادمج مقطعين أو أكثر في فيديو واحد</small></div><label class="file-drop" for="vsMergeFiles"><span class="drop-symbol">＋</span><strong>اختر عدة فيديوهات بالترتيب</strong><small>اخترها بالترتيب الذي تريد دمجها به</small></label><input id="vsMergeFiles" type="file" accept="video/*" multiple class="hidden"><div class="picked-file hidden" id="vsMergeInfo"></div><button class="ghost-btn action-wide" id="vsMerge" disabled>دمج المقاطع وتنزيل MP4</button>',
 '<div class="vs-actions"><button class="primary-btn action-wide" id="vsExport" disabled>تطبيق التعديلات وتصدير الفيديو</button><div class="vs-quick-actions"><button class="ghost-btn" id="vsMp3" disabled>استخراج MP3</button><button class="ghost-btn" id="vsWav" disabled>استخراج WAV</button><button class="ghost-btn" id="vsGif" disabled>تحويل إلى GIF</button></div></div><div class="progress-wrap hidden" id="vsProgress"><div class="progress-track"><span id="vsBar"></span></div><small id="vsStatus">جاهز</small></div><p class="compression-note">المعالجة تتم على جهازك. ملفات الفيديو الكبيرة قد تستهلك ذاكرة ووقتاً كبيرين. لا يمكن ضمان أن كل الترميزات تعمل على كل الملفات؛ بعض الحاويات أو المؤثرات قد لا تكون متاحة في نسخة FFmpeg المستخدمة.</p></section></div></div>'
@@ -332,15 +332,38 @@ const c=document.createElement("canvas");c.width=video.videoWidth;c.height=video
 c.toBlob(b=>{if(!b){showError("تعذر التقاط الإطار الحالي.");return}downloadBlob(b,safeName(sourceFile.name)+"-frame.png","image") },"image/png");
 }
 el("vsSnapshot").onclick=snapshot;
-function makeTextOverlay(width,height){
-const text=el("vsText").value.trim();if(!text)return null;
+async function makeTextOverlay(textValue,colorValue,width,height){
+if(!textValue)return null;
 const c=document.createElement("canvas");c.width=width;c.height=height;const ctx=c.getContext("2d");
-const px=Number(el("vsTextSize").value),color=el("vsTextColor").value,stroke=el("vsTextStroke").value,lines=text.split(/\r?\n/).slice(0,5);
-ctx.font="bold "+px+"px Arial, sans-serif";ctx.textAlign="center";ctx.textBaseline="middle";ctx.direction=/[\u0600-\u06ff]/.test(text)?"rtl":"ltr";
+const px=Number(el("vsTextSize").value),color=colorValue||el("vsTextColor").value,stroke=el("vsTextStroke").value,maxWidth=width*.86;
+ctx.font="bold "+px+"px Arial, sans-serif";ctx.textAlign="center";ctx.textBaseline="middle";ctx.direction=/[\u0600-\u06ff]/.test(textValue)?"rtl":"ltr";
+const lines=[];
+textValue.split(/\r?\n/).slice(0,5).forEach(raw=>{let line="";raw.split(/\s+/).forEach(word=>{const candidate=line?line+" "+word:word;if(line&&ctx.measureText(candidate).width>maxWidth){lines.push(line);line=word}else line=candidate});if(line)lines.push(line)});
 const lineHeight=px*1.35,total=lineHeight*lines.length;let y=el("vsTextPosition").value==="top"?total/2+24:el("vsTextPosition").value==="center"?height/2:height-total/2-35;
-if(el("vsTextBox").checked){const widest=Math.max.apply(null,lines.map(t=>ctx.measureText(t).width))+38;ctx.fillStyle="rgba(0,0,0,.48)";ctx.fillRect((width-widest)/2,y-total/2-8,widest,total+16)}
+if(el("vsTextBox").checked){const widest=Math.min(maxWidth,Math.max.apply(null,lines.map(t=>ctx.measureText(t).width))+38);ctx.fillStyle="rgba(0,0,0,.48)";ctx.fillRect((width-widest)/2,y-total/2-8,widest,total+16)}
 lines.forEach((line,i)=>{const yy=y-total/2+lineHeight*(i+.5);if(el("vsTextOutline").checked){ctx.lineWidth=Math.max(2,px*.09);ctx.strokeStyle=stroke;ctx.shadowColor="rgba(0,0,0,.55)";ctx.shadowBlur=8;ctx.strokeText(line,width/2,yy)}ctx.shadowBlur=0;ctx.fillStyle=color;ctx.fillText(line,width/2,yy)});
-return new Promise((resolve,reject)=>c.toBlob(b=>b?resolve(b):reject(Error("تعذر إنشاء طبقة النص")), "image/png"));
+return new Promise((resolve,reject)=>c.toBlob(b=>b?resolve(b):reject(Error("تعذر إنشاء طبقة النص")),"image/png"));
+}
+function srtSeconds(value){const p=value.replace(",",".").split(":");return Number(p[0])*3600+Number(p[1])*60+Number(p[2])}
+async function collectTextEntries(clipStart,clipDuration){
+const entries=[],baseText=el("vsText").value.trim();
+if(baseText)entries.push({text:baseText,color:el("vsTextColor").value,start:Math.max(0,Number(el("vsTextStart").value)||0),end:Number(el("vsTextEnd").value)||clipDuration||99999});
+el("vsCaptions").value.split(/\r?\n/).forEach(line=>{
+if(entries.length>=20||!line.trim())return;const p=line.split("|");if(p.length<4)return;
+const start=Number(p[0].trim()),end=Number(p[1].trim()),color=p[2].trim(),text=p.slice(3).join("|").trim();
+if(text&&Number.isFinite(start)&&Number.isFinite(end)&&end>start)entries.push({text,color:/^#[0-9a-f]{6}$/i.test(color)?color:el("vsTextColor").value,start,end});
+});
+const srtFile=el("vsSrtFile").files[0];
+if(srtFile&&entries.length<20){
+const raw=(await srtFile.text()).replace(/\r/g,""),blocks=raw.split(/\n{2,}/);
+blocks.forEach(block=>{
+if(entries.length>=20)return;const lines=block.split("\n"),timeLine=lines.find(x=>x.indexOf("-->")>=0);if(!timeLine)return;
+const match=timeLine.match(/(\d{2}:\d{2}:\d{2}[,.]\d+)\s*-->\s*(\d{2}:\d{2}:\d{2}[,.]\d+)/);if(!match)return;
+const start=Math.max(0,srtSeconds(match[1])-clipStart),end=Math.max(0,srtSeconds(match[2])-clipStart),text=lines.slice(lines.indexOf(timeLine)+1).join("\n").replace(/<[^>]*>/g,"").replace(/\{[^}]*\}/g,"").trim();
+if(text&&end>start)entries.push({text,color:el("vsTextColor").value,start,end});
+});
+}
+return entries.slice(0,20).filter(x=>x.end>x.start&&(!clipDuration||x.start<clipDuration));
 }
 function getVideoFilters(duration,speed){
 const filters=[],rotate=el("vsRotate").value,flip=el("vsFlip").value,zoom=Number(el("vsZoom").value),resolution=el("vsResolution").value,effect=el("vsEffect").value;
@@ -355,6 +378,7 @@ if(effect==="cinema")filters.push("eq=contrast=1.15:saturation=1.18:brightness=0
 if(effect==="vivid")filters.push("eq=contrast=1.12:saturation=1.55");
 if(effect==="neon")filters.push("eq=contrast=1.25:saturation=1.8:brightness=0.02","unsharp=5:5:0.8");
 if(effect==="blur")filters.push("boxblur=2:1");
+if(effect==="denoise")filters.push("hqdn3d=1.5:1.5:6:6");
 if(effect==="sharp")filters.push("unsharp=5:5:0.8:3:3:0.4");
 const brightness=Number(el("vsBrightness").value),contrast=Number(el("vsContrast").value),saturation=Number(el("vsSaturation").value);
 if(brightness!==0||contrast!==1||saturation!==1)filters.push("eq=brightness="+brightness+":contrast="+contrast+":saturation="+saturation);
@@ -375,30 +399,33 @@ let f=null,names=[];
 try{
 f=await getEngine();
 const input="vs-source."+videoExt(sourceFile),output="vs-result."+format;
-f.FS("writeFile",input,await window.FFmpeg.fetchFile(sourceFile));names.push(input);
+f.FS("writeFile",input,await window.FFmpeg.fetchFile(sourceFile));names.push(input,output);
 let args=["-i",input];if(start>0)args.push("-ss",String(start));if(duration>0)args.push("-t",String(duration));
 if(format==="mp3"||format==="wav"){
 args.push("-vn","-map","0:a:0");if(format==="mp3")args.push("-c:a","libmp3lame","-q:a","2");else args.push("-c:a","pcm_s16le");
 args.push("-y",output);
 }else{
-const filters=getVideoFilters(duration,speed),text=el("vsText").value.trim(),w=video.videoWidth||1280,h=video.videoHeight||720;
-let overlayIndex=-1,audioIndex=-1;
-if(text){const overlay=await makeTextOverlay(w,h),overlayName="vs-text.png";f.FS("writeFile",overlayName,new Uint8Array(await overlay.arrayBuffer()));names.push(overlayName);args.push("-loop","1","-i",overlayName);overlayIndex=1}
-const audioFile=el("vsAudio").files[0]||recordedVoice;
-if(audioFile){const audioName="vs-extra-audio."+((audioFile.name&&audioFile.name.split(".").pop())||"webm").replace(/[^a-z0-9]/gi,"");f.FS("writeFile",audioName,await window.FFmpeg.fetchFile(audioFile));names.push(audioName);args.push("-i",audioName);audioIndex=overlayIndex>=0?2:1}
+const filters=getVideoFilters(duration,speed),w=video.videoWidth||1280,h=video.videoHeight||720;
+let audioIndex=-1,overlayEntries=[];
+if(format!=="gif")overlayEntries=await collectTextEntries(start,duration);
+else overlayEntries=await collectTextEntries(start,duration);
+for(let i=0;i<overlayEntries.length;i++){
+const item=overlayEntries[i],overlay=await makeTextOverlay(item.text,item.color,w,h),overlayName="vs-text-"+i+".png";
+f.FS("writeFile",overlayName,new Uint8Array(await overlay.arrayBuffer()));names.push(overlayName);args.push("-loop","1","-i",overlayName);item.inputIndex=i+1;
+}
+const audioFile=format==="gif"?null:(el("vsAudio").files[0]||recordedVoice);
+if(audioFile){const audioName="vs-extra-audio."+((audioFile.name&&audioFile.name.split(".").pop())||"webm").replace(/[^a-z0-9]/gi,"");f.FS("writeFile",audioName,await window.FFmpeg.fetchFile(audioFile));names.push(audioName);args.push("-i",audioName);audioIndex=overlayEntries.length+1}
+let graph="[0:v]"+(filters.length?filters.join(","):"null")+"[v0]",current="[v0]";
+overlayEntries.forEach((item,i)=>{const next="[v"+(i+1)+"]";graph+=";"+current+"["+item.inputIndex+":v]overlay=0:0:shortest=1:enable='between(t,"+item.start+","+item.end+")'"+next;current=next});
 if(format==="gif"){
-let base="[0:v]"+(filters.length?filters.join(",")+",":"")+"fps=12,scale=480:-1:flags=lanczos";
-if(overlayIndex>=0)base="[0:v]"+(filters.length?filters.join(",")+",":"")+"null[vpre];[vpre][1:v]overlay=0:0:shortest=1:enable='between(t,"+(Number(el("vsTextStart").value)||0)+","+(Number(el("vsTextEnd").value)||duration||99999)+")'[vtxt];[vtxt]fps=12,scale=480:-1:flags=lanczos";
-args.push("-filter_complex",base+",split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse[vout]","-map","[vout]","-loop","0","-an","-y",output);
+graph+=";"+current+"fps=12,scale=480:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse[vout]";
+args.push("-filter_complex",graph,"-map","[vout]","-loop","0","-an","-y",output);
 }else{
-const textStart=Math.max(0,Number(el("vsTextStart").value)||0),textEnd=Number(el("vsTextEnd").value)||duration||99999;
-if(overlayIndex>=0){
-const vf=filters.length?filters.join(","):"null";
-args.push("-filter_complex","[0:v]"+vf+"[vbase];[vbase][1:v]overlay=0:0:enable='between(t,"+textStart+","+textEnd+")'[vout]","-map","[vout]");
-}else if(filters.length)args.push("-vf",filters.join(","));
+if(filters.length||overlayEntries.length)args.push("-filter_complex",graph,"-map",current);
+else args.push("-map","0:v:0");
 if(audioIndex>=0){args.push("-map",audioIndex+":a:0","-af","volume="+Number(el("vsVolume").value),"-c:a","aac","-b:a","160k","-shortest")}
 else if(el("vsMute").checked)args.push("-an");
-else args.push("-map","0:a?");
+else{args.push("-map","0:a?");if(speed!==1)args.push("-af","atempo="+speed)}
 if(format==="webm")args.push("-c:v","libvpx","-b:v","1M","-c:a","libvorbis");
 else args.push("-c:v","libx264","-preset","ultrafast","-crf",el("vsQuality").value,"-pix_fmt","yuv420p","-c:a","aac","-b:a","128k","-movflags","+faststart");
 args.push("-y",output);
