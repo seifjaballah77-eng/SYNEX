@@ -37,7 +37,7 @@ if(localStorage.getItem("synex-theme")==="light")document.body.classList.add("li
 const info={quickdrop:["QuickDrop","نقل الملفات","نقل الملفات بين الأجهزة يحتاج إلى خدمة نقل واتصال مخصصة."],screentext:["ScreenText","استخراج النصوص والتصميم","استخراج النصوص من الصور وتحريرها قيد التطوير."],voicetype:["Voice FX","تأثيرات الصوت","سجّل صوتك وغيّر سرعته ونبرته ثم استمع أو نزّل النتيجة."]};
 function openTool(name){
 if(!isGuest&&!isSignedIn){openLogin();return}
-$("tools").classList.add("hidden");document.querySelector(".hero").classList.add("hidden");$("workspace").classList.remove("hidden");
+$("installApp").classList.add("hidden");$("tools").classList.add("hidden");document.querySelector(".hero").classList.add("hidden");$("workspace").classList.remove("hidden");
 document.querySelectorAll(".side-tool").forEach(b=>b.classList.toggle("active",b.dataset.tool===name));
 if(name==="compressor")renderCompressor();
 else if(name==="qrreader")renderQrReader();
@@ -51,13 +51,15 @@ else renderQuickDrop();
 window.scrollTo({top:0,behavior:"smooth"});
 }
 document.querySelectorAll("[data-tool]").forEach(btn=>btn.addEventListener("click",()=>openTool(btn.dataset.tool)));
-function showHome(){$("workspace").classList.add("hidden");$("tools").classList.remove("hidden");document.querySelector(".hero").classList.remove("hidden");document.querySelectorAll(".side-tool").forEach(b=>b.classList.remove("active"));window.scrollTo({top:0,behavior:"smooth"})}
+function showHome(){$("installApp").classList.add("hidden");$("workspace").classList.add("hidden");$("tools").classList.remove("hidden");document.querySelector(".hero").classList.remove("hidden");document.querySelectorAll(".side-tool").forEach(b=>b.classList.remove("active"));window.scrollTo({top:0,behavior:"smooth"})}
+function showInstall(){$("tools").classList.add("hidden");document.querySelector(".hero").classList.add("hidden");$("workspace").classList.add("hidden");$("installApp").classList.remove("hidden");document.querySelectorAll(".side-tool").forEach(b=>b.classList.remove("active"));window.scrollTo({top:0,behavior:"smooth"})}
+$("installNav").addEventListener("click",showInstall);$("installBack").addEventListener("click",showHome);
 function showHelp(){
-$("tools").classList.add("hidden");document.querySelector(".hero").classList.add("hidden");$("workspace").classList.remove("hidden");
+$("installApp").classList.add("hidden");$("tools").classList.add("hidden");document.querySelector(".hero").classList.add("hidden");$("workspace").classList.remove("hidden");
 $("toolContent").innerHTML='<div class="tool-workspace"><span class="section-kicker">SYNEX GUIDE</span><h2>مركز المساعدة</h2><div class="help-grid"><article><b>Video Studio</b><p>تحرير الفيديو، قص المقاطع ودمجها، إضافة التأثيرات والكتابة والترجمة والصوت، وتصدير MP4 أو GIF أو MP3/WAV. معالجة الملفات تتم داخل المتصفح، وقد تحتاج الملفات الكبيرة إلى ذاكرة إضافية.</p></article><article><b>Text Lab</b><p>إنشاء كلمات مرور، عدّ الكلمات والأحرف والأسطر، مقارنة نصين، وتنظيف النصوص وتنسيقها.</p></article><article><b>File Lab</b><p>ضغط GZIP لملف واحد أو ZIP لعدة ملفات ومجلدات. اختر الصور لمعاينتها وتصديرها بصيغ مختلفة.</p></article><article><b>QR Generator</b><p>أنشئ رمز QR من رابط أو نص ثم نزّله كصورة PNG.</p></article><article><b>QR Reader</b><p>ارفع صورة QR لقراءة محتواها ونسخه أو فتح الرابط.</p></article><article><b>ScreenText</b><p>استخرج النص من صورة باستخدام OCR داخل المتصفح، ثم انسخه أو نزّله TXT.</p></article><article><b>VoiceType</b><p>حوّل الكلام المباشر إلى نص باستخدام خدمة التعرف على الكلام في المتصفح؛ يتطلب متصفحاً يدعمها وميكروفوناً.</p></article><article><b>QuickDrop</b><p>شارك رابطاً أو QR لاستقبال ملفات مباشرة عبر PeerJS وWebRTC. يتطلب بقاء الصفحتين مفتوحتين، وقد تتعذر بعض الشبكات المقيدة.</p></article><article><b>السجل والخصوصية</b><p>السجل الحالي محفوظ محلياً على هذا الجهاز. الزائر يحتفظ به 48 ساعة، والمستخدم المسجل 120 يوماً محلياً. المزامنة السحابية بين الأجهزة تحتاج إعداد قاعدة بيانات وتخزين.</p></article><article><b>تسجيل الدخول</b><p>يتطلب إعداد مفاتيح Supabase وتفعيل Google OAuth. بيانات الاتصال غير مضبوطة في نسخة الإعداد الحالية.</p></article></div></div>';
 }
 function showGlobalHistory(){
-$("tools").classList.add("hidden");document.querySelector(".hero").classList.add("hidden");$("workspace").classList.remove("hidden");
+$("installApp").classList.add("hidden");$("tools").classList.add("hidden");document.querySelector(".hero").classList.add("hidden");$("workspace").classList.remove("hidden");
 const items=readActivity();
 $("toolContent").innerHTML='<div class="tool-workspace"><span class="section-kicker">ACTIVITY VAULT</span><h2>سجل الملفات والعمليات</h2><p>تبقى السجلات على هذا الجهاز دون حذف تلقائي. الملفات التي تم حفظها يمكن فتحها أو إعادة تنزيلها.</p><div class="history-toolbar"><span id="historyCount"></span><button class="ghost-btn" id="clearGlobalHistory">مسح السجل والملفات</button></div><div class="history-panel" id="globalHistory"></div></div>';
 const box=$("globalHistory");$("historyCount").textContent=items.length+" عملية محفوظة";
@@ -733,7 +735,6 @@ window.addEventListener("appinstalled",()=>{
  $("installButton").textContent="تم التثبيت";$("installButton").disabled=true;
 });
 function isAppleMobile(){return /iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1)}
-$("sideInstall").addEventListener("click",()=>{$("installApp").scrollIntoView({behavior:"smooth",block:"start"});document.querySelectorAll(".side-tool").forEach(b=>b.classList.toggle("active",b.id==="sideInstall"));});
 $("installButton").addEventListener("click",async()=>{
  if(deferredInstallPrompt){
   deferredInstallPrompt.prompt();
