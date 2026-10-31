@@ -10,7 +10,7 @@ $("startNow").addEventListener("click",()=>openTool("compressor"));
 $("guestWarning").classList.remove("hidden");
 $("themeToggle").addEventListener("click",()=>{document.body.classList.toggle("light");localStorage.setItem("synex-theme",document.body.classList.contains("light")?"light":"dark")});
 if(localStorage.getItem("synex-theme")==="light")document.body.classList.add("light");
-const info={quickdrop:["QuickDrop","نقل الملفات","نقل الملفات بين الأجهزة يحتاج إلى خدمة نقل واتصال مخصصة."],screentext:["ScreenText","استخراج النصوص والتصميم","استخراج النصوص من الصور وتحريرها قيد التطوير."],voicetype:["VoiceType","تحويل الصوت إلى نص","تحويل الكلام والتسجيلات إلى نص قيد التطوير."]};
+const info={quickdrop:["QuickDrop","نقل الملفات","نقل الملفات بين الأجهزة يحتاج إلى خدمة نقل واتصال مخصصة."],screentext:["ScreenText","استخراج النصوص والتصميم","استخراج النصوص من الصور وتحريرها قيد التطوير."],voicetype:["Voice FX","تأثيرات الصوت","سجّل صوتك وغيّر سرعته ونبرته ثم استمع أو نزّل النتيجة."]};
 function openTool(name){
 if(!isGuest&&!isSignedIn){openLogin();return}
 $("tools").classList.add("hidden");document.querySelector(".hero").classList.add("hidden");$("workspace").classList.remove("hidden");
@@ -186,124 +186,58 @@ $("saveOcr").onclick=()=>{const value=$("ocrText").value;saveActivityFile("OCR t
 }
 function downloadText(value,name){const a=document.createElement("a"),u=URL.createObjectURL(new Blob([value],{type:"text/plain;charset=utf-8"}));a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),10000)}
 function renderVoiceType(){
-$("toolContent").innerHTML='<div class="tool-workspace"><span class="section-kicker">SYNEX VOICE STUDIO</span><h2>تحويل الكلام والصوت</h2><p>تحدث ليظهر النص مباشرة، أو اكتب نصاً واختر صوتاً لتجربته. أوامر الترقيم تُنفّذ كرموز بدلاً من تكرار الكلمات.</p><div class="compress-panel voice-panel"><div class="voice-live-status" id="voiceStatus"><i></i><span>جاهز — اضغط بدء التسجيل واسمح باستخدام الميكروفون</span></div><div class="voice-toolbar"><select id="voiceLang" aria-label="لغة التعرف على الكلام"><option value="ar-TN">العربية (تونس)</option><option value="ar-SA">العربية</option><option value="ar-EG">العربية (مصر)</option><option value="fr-FR">Français</option><option value="en-US">English</option><option value="ru-RU">Русский</option></select><button class="primary-btn" id="voiceStart">● بدء الكلام</button><button class="ghost-btn" id="voiceStop" disabled>■ إيقاف</button></div><label for="voiceText">النص الناتج</label><textarea id="voiceText" rows="8" placeholder="ابدأ التحدث أو اكتب هنا..."></textarea><div class="qr-actions"><button class="ghost-btn" id="copyVoice">نسخ النص</button><button class="ghost-btn" id="clearVoice">مسح</button><button class="ghost-btn" id="saveVoice">تنزيل TXT</button></div><div class="voice-command-help"><b>الأوامر الصوتية</b><span>افتح قوس ← (</span><span>أغلق قوس ← )</span><span>علامة استفهام ← ؟</span><span>فاصلة ← ،</span><span>نقطة ← .</span><span>سطر جديد ← سطر جديد</span></div></div><div class="compress-panel voice-panel"><span class="section-kicker">TEXT TO SPEECH</span><h3>حوّل النص إلى صوت</h3><textarea id="speakText" rows="4" placeholder="اكتب النص الذي تريد سماعه..."></textarea><label for="voiceSelect">اختر نمط الصوت (20 تأثيراً)</label><select id="voiceSelect"></select><label for="baseVoiceSelect">الصوت الأساسي المثبت على جهازك</label><select id="baseVoiceSelect"></select><div class="voice-toolbar"><button class="primary-btn" id="previewVoice">▶ تجربة الصوت</button><button class="ghost-btn" id="stopVoice">إيقاف الصوت</button><button class="ghost-btn" id="downloadSpeech">تنزيل الصوت WEBM</button></div><p class="compression-note" id="speechStatus">الأصوات تختلف حسب نظام التشغيل واللغات المثبتة. لتنزيل الصوت سيطلب المتصفح مشاركة صوت هذا التبويب؛ اختر مشاركة صوت التبويب.</p></div></div>';
-const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-let rec=null,finalText="",isListening=false,voices=[];
-const status=(msg,active=false)=>{$("voiceStatus").querySelector("span").textContent=msg;$("voiceStatus").classList.toggle("recording",active)};
-const normalize=s=>s.toLowerCase().replace(/[ًٌٍَُِّْـ]/g,"").replace(/[أإآ]/g,"ا").replace(/ة/g,"ه").replace(/\s+/g," ").trim();
-const commands=[
-[/^(?:افتح|حط|ضع)\s+(?:قوس|القوس)(?:\s+فتح)?$/,"("],
-[/^(?:اغلق|اقفل|سكر)\s+(?:قوس|القوس)$/ ,")"],
-[/^(?:علامه)\s+(?:استفهام|السؤال)$/,"؟"],
-[/^(?:فاصله|فاصله عربيه)$/,"،"],
-[/^(?:نقطه|نقطه توقف)$/,"."],
-[/^(?:علامه)\s+تعجب$/,"!"],
-[/^(?:سطر جديد|انزل سطر)$/,"\n"],
-[/^(?:نقطتان|نقطتين)$/ ,":"],
-[/^(?:افتح علامه تنصيص)$/,"“"],
-[/^(?:اغلق علامه تنصيص)$/,"”"]
-];
-function removeRepeatedWords(text){
-const parts=String(text||"").split(/(\s+)/),out=[];let last="";
-for(const part of parts){
-if(!part||/^\s+$/.test(part)){out.push(part);continue}
-const key=normalize(part.replace(/[،,؛;.!؟?()“”"]/g,""));
-if(key&&key===last)continue;
-if(key)last=key;out.push(part);
-}
-return out.join("").replace(/\s+([،,؛;.!؟?])/g,"$1");
-}
-function convertCommands(text){
-let out=removeRepeatedWords(text);
-const replacements=[
-[/(?:(?:افتح|حط|ضع)\s*){1,4}(?:ال)?قوس(?:\s+فتح)?/gi,"("],
-[/(?:اغلق|اقفل|سكر)\s+(?:ال)?قوس/gi,")"],
-[/علام(?:ة|ه)\s+(?:ال)?استفهام/gi,"؟"],
-[/فاصله(?:\s+عربيه)?/gi,"،"],
-[/نقطه(?:\s+توقف)?/gi,"."],
-[/علام(?:ة|ه)\s+تعجب/gi,"!"],
-[/(?:سطر\s+جديد|انزل\s+سطر)/gi,"\n"],
-[/(?:نقطتان|نقطتين)/gi,":"],
-[/افتح\s+علام(?:ة|ه)\s+تنصيص/gi,"“"],
-[/اغلق\s+علام(?:ة|ه)\s+تنصيص/gi,"”"]
-];
-for(const [pattern,value] of replacements)out=out.replace(pattern,value);
-out=out.replace(/([()؟،.!])(?:\s*\1)+/g,"$1");
-return out;
-}
-if(!SR){$("voiceStart").disabled=true;status("التعرف على الكلام غير مدعوم في هذا المتصفح. جرّب Chrome حديثاً.");}
-else{
-rec=new SR();rec.continuous=true;rec.interimResults=true;rec.maxAlternatives=1;
-rec.onstart=()=>{isListening=true;$("voiceStart").disabled=true;$("voiceStop").disabled=false;status("أستمع إليك الآن...",true)};
-rec.onresult=e=>{
-const finalParts=[],interimParts=[];
-/* إعادة بناء النص من النتائج الحالية تمنع إلحاق المقطع نفسه أكثر من مرة */
-for(let i=0;i<e.results.length;i++){
-const result=e.results[i],spoken=(result[0]&&result[0].transcript||"").trim();
-if(!spoken)continue;
-if(result.isFinal)finalParts.push(spoken);else interimParts.push(spoken);
-}
-finalText=convertCommands(finalParts.join(" "));
-const interim=removeRepeatedWords(interimParts.join(" "));
-$("voiceText").value=finalText+(interim?(finalText&&!/[\s\n]$/.test(finalText)?" ":"")+interim:"");
-};
-rec.onerror=e=>{status("مشكلة في الميكروفون أو خدمة التعرف: "+e.error);};
-rec.onend=()=>{isListening=false;$("voiceStart").disabled=false;$("voiceStop").disabled=true;if($("voiceStatus").querySelector("span").textContent.includes("أستمع"))status("توقف الاستماع.");};
-$("voiceStart").onclick=()=>{finalText=$("voiceText").value;try{rec.lang=$("voiceLang").value;rec.start()}catch(e){status("تعذر بدء التسجيل. انتظر لحظة ثم حاول مجدداً.")}};
-$("voiceStop").onclick=()=>{if(rec&&isListening)rec.stop()};
-}
-$("voiceText").addEventListener("input",()=>{finalText=$("voiceText").value});
-$("copyVoice").onclick=async()=>{try{await navigator.clipboard.writeText($("voiceText").value);toast("تم نسخ النص")}catch(_){$("voiceText").select();document.execCommand("copy")}};
-$("clearVoice").onclick=()=>{$("voiceText").value="";finalText="";};
-$("saveVoice").onclick=()=>{const value=$("voiceText").value;saveActivityFile("Voice transcription","TXT export","SYNEX-Voice.txt",new Blob([value],{type:"text/plain;charset=utf-8"})).catch(()=>{});downloadText(value,"SYNEX-Voice.txt")};
-const voiceStyles=[
-["فضائي",1.8,.82],["روبوت",.72,.92],["عميق",.55,.86],["عملاق",.35,.72],["طفولي",1.85,1.12],
-["كرتوني",1.65,1.22],["سريع",1,1.42],["بطيء",1,.72],["همس هادئ",.92,.82],["مذيع",.94,1],
-["إذاعي عميق",.62,.94],["مرح",1.35,1.12],["حازم",.78,.98],["رفيع",1.72,1.04],["غامض",.68,.8],
-["آلي مستقبلي",1.45,.9],["هادئ",1,.88],["نشِط",1.18,1.28],["سينمائي",.7,.9],["فضائي غريب",1.95,.68]
-];
-function loadVoices(){
-voices=window.speechSynthesis?window.speechSynthesis.getVoices():[];
-const base=$("baseVoiceSelect");base.innerHTML="";
-if(!voices.length){const o=document.createElement("option");o.textContent="الصوت الافتراضي للنظام";o.value="";base.append(o)}
-voices.forEach((v,i)=>{const o=document.createElement("option");o.value=String(i);o.textContent=v.name+" — "+v.lang;base.append(o)});
-}
-const styleSelect=$("voiceSelect");voiceStyles.forEach((s,i)=>{const o=document.createElement("option");o.value=String(i);o.textContent=(i+1)+". "+s[0];styleSelect.append(o)});
-if(window.speechSynthesis){loadVoices();window.speechSynthesis.onvoiceschanged=loadVoices;}
-function selectedVoice(){return voices[Number($("baseVoiceSelect").value)]||voices[0]||null}
-function selectedStyle(){return voiceStyles[Number($("voiceSelect").value)]||voiceStyles[0]}
-function speakNow(){
-const text=$("speakText").value.trim();if(!text){toast("اكتب نصاً أولاً");return}
-if(!window.speechSynthesis){$("speechStatus").textContent="تحويل النص إلى صوت غير مدعوم هنا.";return}
-window.speechSynthesis.cancel();const utter=new SpeechSynthesisUtterance(text),v=selectedVoice(),style=selectedStyle();utter.pitch=style[1];utter.rate=style[2];if(v){utter.voice=v;utter.lang=v.lang}
-utter.onstart=()=>{$("speechStatus").textContent="الصوت يعمل الآن: "+(v?v.name:"الصوت الافتراضي")};
-utter.onend=()=>{$("speechStatus").textContent="انتهت التجربة."};
-utter.onerror=()=>{$("speechStatus").textContent="تعذر تشغيل هذا الصوت."};
-window.speechSynthesis.speak(utter);
-}
-$("previewVoice").onclick=speakNow;
-$("stopVoice").onclick=()=>{if(window.speechSynthesis)window.speechSynthesis.cancel();$("speechStatus").textContent="تم إيقاف الصوت."};
-$("downloadSpeech").onclick=async()=>{
-const text=$("speakText").value.trim();if(!text){toast("اكتب نصاً أولاً");return}
-if(!navigator.mediaDevices||!navigator.mediaDevices.getDisplayMedia||!window.MediaRecorder){$("speechStatus").textContent="تنزيل الصوت غير مدعوم في هذا المتصفح. يمكنك تجربة الصوت أو تنزيل النص.";return}
-let stream=null,recorder=null,chunks=[];
+$("toolContent").innerHTML='<div class="tool-workspace"><span class="section-kicker">SYNEX VOICE FX</span><h2>تأثيرات على صوتك</h2><p>سجّل صوتك من الميكروفون، ثم غيّر سرعته ونبرته واستمع إلى النتيجة أو نزّلها كملف صوتي.</p><div class="compress-panel voice-panel"><div class="voice-live-status" id="fxStatus"><i></i><span>جاهز — اضغط بدء التسجيل واسمح باستخدام الميكروفون</span></div><div class="voice-toolbar"><button class="primary-btn" id="fxRecord">● بدء التسجيل</button><button class="ghost-btn" id="fxStop" disabled>■ إيقاف التسجيل</button></div><div class="fx-meter"><span id="fxTimer">00:00</span><span id="fxFileInfo">لم يتم تسجيل صوت بعد</span></div><label for="fxEffect">اختر تأثير الصوت</label><select id="fxEffect"><option value="1">طبيعي — السرعة الأصلية</option><option value="1.45">سريع</option><option value="1.8">سريع جداً</option><option value="0.75">بطيء</option><option value="0.55">بطيء جداً</option><option value="0.82">صوت أعمق وأبطأ</option><option value="1.25">صوت أعلى وأسرع</option><option value="1.65">صوت رفيع وكرتوني</option></select><p class="compression-note">ملاحظة: تغيير السرعة يغيّر طبقة الصوت معها؛ البطء يجعل الصوت أعمق والسرعة تجعله أعلى. لا يحتاج إلى كتابة أي نص.</p><audio id="fxAudio" class="fx-audio" controls></audio><div class="voice-toolbar"><button class="primary-btn" id="fxPlay" disabled>▶ استمع بالتأثير</button><button class="ghost-btn" id="fxDownload" disabled>تنزيل الصوت بالتأثير WAV</button></div><div class="qr-actions"><button class="ghost-btn" id="fxOriginal" disabled>تنزيل التسجيل الأصلي</button><button class="ghost-btn" id="fxClear" disabled>مسح التسجيل</button></div><p class="compression-note" id="fxResult">سيتم تجهيز نسخة WAV بالتأثير المختار عند التنزيل.</p></div></div>';
+const status=(message,active=false)=>{$("fxStatus").querySelector("span").textContent=message;$("fxStatus").classList.toggle("recording",active)};
+let recorder=null,chunks=[],originalBlob=null,originalUrl=null,timer=null,startedAt=0;
+const recordBtn=$("fxRecord"),stopBtn=$("fxStop"),audio=$("fxAudio"),effect=$("fxEffect");
+function setReady(ready){$("fxPlay").disabled=!ready;$("fxDownload").disabled=!ready;$("fxOriginal").disabled=!ready;$("fxClear").disabled=!ready}
+function elapsed(){const seconds=Math.floor((Date.now()-startedAt)/1000);$("fxTimer").textContent=String(Math.floor(seconds/60)).padStart(2,"0")+":"+String(seconds%60).padStart(2,"0")}
+function clearRecording(){if(originalUrl)URL.revokeObjectURL(originalUrl);originalUrl=null;originalBlob=null;chunks=[];audio.removeAttribute("src");audio.load();$("fxTimer").textContent="00:00";$("fxFileInfo").textContent="لم يتم تسجيل صوت بعد";$("fxResult").textContent="سيتم تجهيز نسخة WAV بالتأثير المختار عند التنزيل.";setReady(false);status("جاهز — اضغط بدء التسجيل واسمح باستخدام الميكروفون")}
+recordBtn.onclick=async()=>{
+if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia||!window.MediaRecorder){status("تسجيل الميكروفون غير مدعوم في هذا المتصفح. افتح الموقع عبر HTTPS واستخدم Chrome.");return}
 try{
-$("speechStatus").textContent="اختر هذا التبويب من نافذة المشاركة وفعّل مشاركة صوت التبويب.";
-stream=await navigator.mediaDevices.getDisplayMedia({video:true,audio:true});
-const audioTracks=stream.getAudioTracks();stream.getVideoTracks().forEach(t=>t.stop());
-if(!audioTracks.length){stream.getTracks().forEach(t=>t.stop());$("speechStatus").textContent="لم يتم اختيار مشاركة صوت التبويب. أعد المحاولة واختر صوت التبويب.";return}
-const audioStream=new MediaStream(audioTracks);
-const mime=MediaRecorder.isTypeSupported("audio/webm;codecs=opus")?"audio/webm;codecs=opus":"audio/webm";
-recorder=new MediaRecorder(audioStream,{mimeType:mime});
+recordBtn.disabled=true;status("بانتظار إذن الميكروفون...");
+const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+chunks=[];
+const mime=MediaRecorder.isTypeSupported("audio/webm;codecs=opus")?"audio/webm;codecs=opus":(MediaRecorder.isTypeSupported("audio/webm")?"audio/webm":"");
+recorder=new MediaRecorder(stream,mime?{mimeType:mime}:{});
 recorder.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
-recorder.onstop=()=>{const blob=new Blob(chunks,{type:"audio/webm"}),name="SYNEX-Voice-"+Date.now()+".webm";saveActivityFile(name,"Voice audio",name,blob).catch(()=>{});downloadBlob(blob,name);audioStream.getTracks().forEach(t=>t.stop());$("speechStatus").textContent="تم تجهيز التسجيل بصيغة WEBM وحفظه في سجل الملفات."};
-recorder.start();const utter=new SpeechSynthesisUtterance(text),v=selectedVoice(),style=selectedStyle();utter.pitch=style[1];utter.rate=style[2];if(v){utter.voice=v;utter.lang=v.lang}
-utter.onend=()=>setTimeout(()=>{if(recorder&&recorder.state!=="inactive")recorder.stop()},500);
-utter.onerror=()=>{if(recorder&&recorder.state!=="inactive")recorder.stop();$("speechStatus").textContent="تعذر نطق النص."};
-window.speechSynthesis.cancel();window.speechSynthesis.speak(utter);
-$("speechStatus").textContent="جارٍ تسجيل الصوت. اترك التبويب مفتوحاً حتى ينتهي النطق.";
-}catch(e){if(stream)stream.getTracks().forEach(t=>t.stop());$("speechStatus").textContent="لم يبدأ تسجيل الصوت: "+(e.message||"تم إلغاء المشاركة")+". جرّب تجربة الصوت أو تنزيل TXT."}
+recorder.onerror=()=>{stream.getTracks().forEach(t=>t.stop());recordBtn.disabled=false;stopBtn.disabled=true;clearInterval(timer);status("حدث خطأ أثناء التسجيل.")};
+recorder.onstop=()=>{
+stream.getTracks().forEach(t=>t.stop());clearInterval(timer);recordBtn.disabled=false;stopBtn.disabled=true;
+originalBlob=new Blob(chunks,{type:recorder.mimeType||"audio/webm"});originalUrl=URL.createObjectURL(originalBlob);audio.src=originalUrl;audio.playbackRate=Number(effect.value);audio.preservesPitch=false;audio.webkitPreservesPitch=false;
+$("fxFileInfo").textContent="تم التسجيل — "+(originalBlob.size/1024).toFixed(1)+" KB";setReady(true);status("اكتمل التسجيل — اختر التأثير واستمع");
 };
+recorder.start();startedAt=Date.now();elapsed();timer=setInterval(elapsed,500);stopBtn.disabled=false;status("يتم تسجيل صوتك الآن...",true);
+}catch(error){recordBtn.disabled=false;status("تعذر فتح الميكروفون: "+(error.message||"تحقق من الإذن والاتصال الآمن HTTPS"))}
+};
+stopBtn.onclick=()=>{if(recorder&&recorder.state!=="inactive")recorder.stop()};
+effect.onchange=()=>{audio.playbackRate=Number(effect.value);audio.preservesPitch=false;audio.webkitPreservesPitch=false;$("fxResult").textContent="التأثير المحدد: "+effect.options[effect.selectedIndex].text+" — اضغط استمع بالتأثير."};
+$("fxPlay").onclick=async()=>{if(!originalBlob)return;audio.playbackRate=Number(effect.value);audio.preservesPitch=false;audio.webkitPreservesPitch=false;try{audio.currentTime=0;await audio.play();status("يتم تشغيل صوتك بالتأثير المختار...",true)}catch(_){status("اضغط تشغيل من مشغل الصوت للسماع.")}};
+audio.onended=()=>status("انتهى تشغيل الصوت بالتأثير.");
+function encodeWav(buffer){
+const channels=buffer.numberOfChannels,samples=buffer.length,bytes=44+samples*channels*2,array=new ArrayBuffer(bytes),view=new DataView(array);
+function writeString(offset,value){for(let i=0;i<value.length;i++)view.setUint8(offset+i,value.charCodeAt(i))}
+writeString(0,"RIFF");view.setUint32(4,bytes-8,true);writeString(8,"WAVE");writeString(12,"fmt ");view.setUint32(16,16,true);view.setUint16(20,1,true);view.setUint16(22,channels,true);view.setUint32(24,buffer.sampleRate,true);view.setUint32(28,buffer.sampleRate*channels*2,true);view.setUint16(32,channels*2,true);view.setUint16(34,16,true);writeString(36,"data");view.setUint32(40,bytes-44,true);
+const data=[];for(let c=0;c<channels;c++)data.push(buffer.getChannelData(c));let offset=44;
+for(let i=0;i<samples;i++)for(let c=0;c<channels;c++){let sample=Math.max(-1,Math.min(1,data[c][i]));view.setInt16(offset,sample<0?sample*32768:sample*32767,true);offset+=2}
+return new Blob([array],{type:"audio/wav"});
+}
+$("fxDownload").onclick=async()=>{
+if(!originalBlob)return;
+const button=$("fxDownload"),rate=Number(effect.value);button.disabled=true;$("fxResult").textContent="جارٍ تجهيز ملف WAV بالتأثير...";
+let context=null;
+try{
+const bytes=await originalBlob.arrayBuffer();const AudioCtx=window.AudioContext||window.webkitAudioContext;if(!AudioCtx||!window.OfflineAudioContext){throw new Error("تحويل الصوت غير مدعوم في هذا المتصفح")}
+context=new AudioCtx();const decoded=await context.decodeAudioData(bytes);await context.close();context=null;
+const Offline=window.OfflineAudioContext||window.webkitOfflineAudioContext;const length=Math.max(1,Math.ceil(decoded.length/rate));const offline=new Offline(decoded.numberOfChannels,length,decoded.sampleRate);const source=offline.createBufferSource();source.buffer=decoded;source.playbackRate.value=rate;source.connect(offline.destination);source.start(0);
+const rendered=await offline.startRendering(),wav=encodeWav(rendered),name="SYNEX-Voice-FX-"+Date.now()+".wav";saveActivityFile(name,"Voice effect",name,wav).catch(()=>{});downloadBlob(wav,name);$("fxResult").textContent="تم تجهيز وتنزيل نسخة WAV بالتأثير المختار، وأضيفت إلى سجل الملفات.";
+}catch(error){$("fxResult").textContent="تعذر تجهيز نسخة WAV: "+(error.message||"خطأ غير معروف")+". يمكنك الاستماع إلى التأثير من المشغل."}
+finally{if(context)try{await context.close()}catch(_){}button.disabled=false}
+};
+$("fxOriginal").onclick=()=>{if(originalBlob)downloadBlob(originalBlob,"SYNEX-Voice-Original.webm")};
+$("fxClear").onclick=()=>{if(recorder&&recorder.state!=="inactive")recorder.stop();clearRecording()};
+setReady(false);
 }
 const HISTORY_KEY="synex-compression-history-v1";
 function retentionCleanup(){/* لا نحذف السجل تلقائياً؛ يبقى حتى يختار المستخدم مسحه. */}
