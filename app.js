@@ -733,7 +733,7 @@ window.addEventListener("appinstalled",()=>{
  $("installButton").textContent="تم التثبيت";$("installButton").disabled=true;
 });
 function isAppleMobile(){return /iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1)}
-$("installNav").addEventListener("click",()=>{$("installApp").scrollIntoView({behavior:"smooth",block:"start"})});
+$("sideInstall").addEventListener("click",()=>{$("installApp").scrollIntoView({behavior:"smooth",block:"start"});document.querySelectorAll(".side-tool").forEach(b=>b.classList.toggle("active",b.id==="sideInstall"));});
 $("installButton").addEventListener("click",async()=>{
  if(deferredInstallPrompt){
   deferredInstallPrompt.prompt();
