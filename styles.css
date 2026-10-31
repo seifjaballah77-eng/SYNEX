@@ -203,3 +203,27 @@ body.light .vs-fields input:not([type=color]):not([type=range]),body.light .vs-f
 #qdChooseFolder{border-color:#38e8ff66}
 #qdChooseFolder:hover{background:#38e8ff18}
 .qd-receiver #qdConnect{margin-top:2px}
+
+/* Feature QuickDrop as the primary SYNEX action */
+.app-sidebar .quickdrop-nav{
+  width:50px;height:50px;flex:0 0 50px;
+  color:#07121c;
+  font-size:28px;font-weight:900;
+  background:linear-gradient(145deg,#72f6ff,#16c9ee 58%,#8b75ff);
+  border:1px solid #9af8ff;
+  border-radius:16px;
+  box-shadow:0 0 12px #38e8ff66,0 0 28px #38e8ff30;
+}
+.app-sidebar .quickdrop-nav:hover,
+.app-sidebar .quickdrop-nav.active{
+  color:#06131c;background:linear-gradient(145deg,#a4fbff,#28d9f5 58%,#a18aff);
+  box-shadow:0 0 16px #38e8ff99,0 0 34px #38e8ff55;
+}
+.tool-grid>.tool-card.quickdrop{order:-1;grid-column:span 2;min-height:230px;border-color:#38e8ff88;background:linear-gradient(135deg,#102b3cdd,#17182f 70%,#202044)}
+.tool-grid>.tool-card.quickdrop .tool-icon{width:64px;height:64px;font-size:34px;background:#38e8ff18;border:1px solid #38e8ff70;box-shadow:0 0 24px #38e8ff25}
+.tool-grid>.tool-card.quickdrop strong{font-size:23px}
+.tool-grid>.tool-card.quickdrop .tool-desc{max-width:520px}
+@media(max-width:760px){
+ .app-sidebar .quickdrop-nav{width:46px;height:46px;flex-basis:46px;font-size:25px}
+ .tool-grid>.tool-card.quickdrop{grid-column:1/-1;min-height:190px}
+}
