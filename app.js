@@ -146,7 +146,7 @@ const m=parseData(data);if(!m)return;
 if(m.type==="ready"){status("تم الاتصال — بانتظار الملفات","success");$("qdConnect").disabled=true;return}
 if(m.type==="error"){status(m.message||"أوقف المرسل النقل","error");return}
 if(m.type==="file"){
-const safeName=String(m.name||"SYNEX-file").split(/[\\/]/).pop().replace(/[<>:"|?*\\x00-\\x1f]/g,"_");
+const safeName=String(m.name||"SYNEX-file").split(/[\\/]/).pop().replace(/[<>:"|?*]/g,"_").replace(/[\u0000-\u001f]/g,"_");
 receiveFile={name:safeName,size:m.size,mime:m.mime||"application/octet-stream",chunks:[],received:0,index:m.index,chunkCount:0,writer:null,streamed:false};
 if(saveDirectory){const handle=await saveDirectory.getFileHandle(safeName,{create:true});receiveFile.writer=await handle.createWritable();receiveFile.streamed=true}
 else if(m.size>1024*1024*1024){receiveFile=null;sendMessage({type:"error",message:"هذا الملف أكبر من 1GB. اختر مجلد حفظ أولاً لاستقباله مباشرة على القرص."});throw new Error("اختر مجلد حفظ لاستقبال الملفات الأكبر من 1GB")}
