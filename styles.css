@@ -188,3 +188,12 @@ body.light .vs-preview-card{background:#fff}
 body.light .vs-fields input:not([type=color]):not([type=range]),body.light .vs-fields select,body.light .vs-panel textarea,body.light .tl-password-row input{background:#f8f9ff;color:#171b2c}
 @media(max-width:900px){.vs-layout{grid-template-columns:1fr}.vs-preview-card{position:static}.vs-preview-card video{max-height:360px}}
 @media(max-width:600px){.vs-fields{grid-template-columns:1fr}.tl-password-row{grid-template-columns:1fr 1fr}.tl-password-row input{grid-column:1/-1}.tl-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.vs-preview-tools{display:grid;grid-template-columns:1fr}.vs-recorder button{flex:1}.vs-section-title{align-items:flex-start;flex-direction:column}}
+
+/* Compact navigation for the expanded tool set */
+.app-sidebar{max-height:calc(100vh - 28px);overflow-y:auto;scrollbar-width:none}
+.app-sidebar::-webkit-scrollbar{display:none}
+@media(max-width:760px){
+  .app-sidebar{overflow-x:auto;overflow-y:hidden;justify-content:flex-start;scrollbar-width:none}
+  .app-sidebar::-webkit-scrollbar{display:none}
+  .side-brand,.side-tool{width:34px;height:34px;flex:0 0 34px;font-size:14px}
+}
