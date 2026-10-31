@@ -26,6 +26,56 @@ function loadQrLibrary(kind){
  return qrLibraryPromises[kind];
 }
 
+// Site-wide language selector (Google Translate).
+window.googleTranslateElementInit=function(){
+ try{
+  new google.translate.TranslateElement({pageLanguage:"ar",includedLanguages:"ar,fr,en,ru,hi",autoDisplay:false},"google_translate_element");
+  applySavedSiteLanguage();
+ }catch(e){}
+};
+function applySavedSiteLanguage(){
+ const select=$("languageSelect");
+ if(!select)return;
+ const lang=localStorage.getItem("synex-language")||"ar";
+ select.value=lang;
+ document.documentElement.lang=lang;
+ document.documentElement.dir=lang==="ar"?"rtl":"ltr";
+ const combo=document.querySelector(".goog-te-combo");
+ if(combo&&combo.value!==lang){combo.value=lang;combo.dispatchEvent(new Event("change"));}
+}
+function loadSiteTranslation(){
+ const select=$("languageSelect");
+ if(!select)return;
+ select.addEventListener("change",function(){
+  const lang=this.value||"ar";
+  localStorage.setItem("synex-language",lang);
+  document.documentElement.lang=lang;
+  document.documentElement.dir=lang==="ar"?"rtl":"ltr";
+  let attempts=0;
+  const timer=setInterval(function(){
+   const combo=document.querySelector(".goog-te-combo");
+   if(combo){combo.value=lang;combo.dispatchEvent(new Event("change"));clearInterval(timer);}
+   else if(++attempts>=40){clearInterval(timer);toast("تعذر تحميل خدمة الترجمة. تحقق من اتصال الإنترنت.");}
+  },250);
+ });
+ const saved=localStorage.getItem("synex-language")||"ar";
+ select.value=saved;
+ if(saved!=="ar"){
+  let attempts=0;
+  const timer=setInterval(function(){
+   const combo=document.querySelector(".goog-te-combo");
+   if(combo){combo.value=saved;combo.dispatchEvent(new Event("change"));clearInterval(timer);}
+   else if(++attempts>=40)clearInterval(timer);
+  },250);
+ }
+ const script=document.createElement("script");
+ script.src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
+ script.async=true;
+ script.onerror=function(){toast("خدمة الترجمة غير متاحة حالياً.");};
+ document.head.appendChild(script);
+}
+loadSiteTranslation();
+
 // SYNEX يعمل مباشرة دون حساب أو تسجيل دخول.
 // سجل النشاط والعمليات يحتفظ بهما هذا الجهاز لمدة 48 ساعة فقط.
 $("openLogin").classList.add("hidden");
