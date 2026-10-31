@@ -348,5 +348,5 @@ $("backHome").onclick=showHome;
 $("accountButton").onclick=async()=>{if(supabaseClient&&confirm("هل تريد تسجيل الخروج؟")){const{error}=await supabaseClient.auth.signOut();if(!error)location.reload()}};
 window.addEventListener("online",()=>toast("عاد الاتصال بالإنترنت"));window.addEventListener("offline",()=>toast("أنت غير متصل بالإنترنت"));
 if("serviceWorker"in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
-if(new URLSearchParams(location.search).has("quickdrop"))openTool("quickdrop");
+const launchParams=new URLSearchParams(location.search);if(launchParams.has("quickdrop"))openTool("quickdrop");else if(launchParams.get("tool")==="voicetype")openTool("voicetype");
 })();
