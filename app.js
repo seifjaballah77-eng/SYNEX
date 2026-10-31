@@ -156,10 +156,21 @@ const commands=[
 [/^(?:اغلق علامه تنصيص)$/,"”"]
 ];
 function convertCommands(text){
-return text.split(/([،,؛;.!؟?]\s*|\n)/).map(part=>{
-const n=normalize(part);for(const [re,out] of commands)if(re.test(n))return out;
-return part;
-}).join("");
+let out=text;
+const replacements=[
+[/(?:افتح|حط|ضع)\s+(?:ال)?قوس(?:\s+فتح)?/gi,"("],
+[/(?:اغلق|اقفل|سكر)\s+(?:ال)?قوس/gi,")"],
+[/علامه\s+(?:ال)?استفهام/gi,"؟"],
+[/فاصله(?:\s+عربيه)?/gi,"،"],
+[/نقطه(?:\s+توقف)?/gi,"."],
+[/علامه\s+تعجب/gi,"!"],
+[/(?:سطر\s+جديد|انزل\s+سطر)/gi,"\n"],
+[/(?:نقطتان|نقطتين)/gi,":"],
+[/افتح\s+علامه\s+تنصيص/gi,"“"],
+[/اغلق\s+علامه\s+تنصيص/gi,"”"]
+];
+for(const [pattern,value] of replacements)out=out.replace(pattern,value);
+return out;
 }
 if(!SR){$("voiceStart").disabled=true;status("التعرف على الكلام غير مدعوم في هذا المتصفح. جرّب Chrome حديثاً.");}
 else{
