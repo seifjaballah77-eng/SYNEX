@@ -4,6 +4,7 @@
   const toastEl = $("toast");
   let toastTimer;
   let isGuest = false;
+  let isSignedIn = false;
   let supabaseClient = null;
 
   function toast(message) {
@@ -22,6 +23,9 @@
   }
 
   function showSignedIn(user) {
+    isSignedIn = true;
+    isGuest = false;
+    dialog.close();
     $("openLogin").classList.add("hidden");
     $("accountButton").classList.remove("hidden");
     $("accountButton").textContent = (user.email || "S").slice(0,1).toUpperCase();
@@ -35,16 +39,18 @@
 
   $("openLogin").addEventListener("click", openLogin);
   $("startNow").addEventListener("click", () => {
-    if (!isGuest && !supabaseClient) openLogin();
+    if (!isGuest && !isSignedIn) openLogin();
     else $("tools").scrollIntoView({behavior:"smooth"});
   });
-  $("guestSkip").addEventListener("click", () => {
+  function continueAsGuest() {
     isGuest = true;
     $("guestWarning").classList.remove("hidden");
     dialog.close();
     $("tools").scrollIntoView({behavior:"smooth"});
     toast("تتابع كزائر — لن تُحفظ ملفاتك ومعلوماتك");
-  });
+  }
+  $("guestSkip").addEventListener("click", continueAsGuest);
+  $("dialogSkip").addEventListener("click", continueAsGuest);
   $("googleSignIn").addEventListener("click", async () => {
     if (!supabaseClient) {
       $("authHint").classList.remove("hidden");
@@ -70,9 +76,9 @@
   };
   document.querySelectorAll("[data-tool]").forEach(button => {
     button.addEventListener("click", () => {
+      if (!isGuest && !isSignedIn) { openLogin(); return; }
       const tool = tools[button.dataset.tool];
       $("tools").classList.add("hidden");
-      $("hero")?.classList.add("hidden");
       document.querySelector(".hero").classList.add("hidden");
       $("workspace").classList.remove("hidden");
       $("toolContent").innerHTML = '<div class="placeholder-panel"><span class="section-kicker">SYNEX WORKSPACE</span><h2></h2><p></p><p class="section-hint">هذه واجهة تأسيسية؛ لم يتم تفعيل وظائف المعالجة والنقل بعد.</p></div>';
