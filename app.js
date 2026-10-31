@@ -21,6 +21,8 @@ else if(name==="qrgenerator")renderQrGenerator();
 else if(name==="screentext")renderScreenText();
 else if(name==="voicetype")renderVoiceType();
 else if(name==="converter")renderConverter();
+else if(name==="videostudio")renderVideoStudio();
+else if(name==="textlab")renderTextLab();
 else renderQuickDrop();
 window.scrollTo({top:0,behavior:"smooth"});
 }
@@ -281,6 +283,219 @@ if(!blob||!blob.size)throw Error("لم ينتج ملف؛ قد تكون الصي�
 catch(e){console.error(e);$c("cvStatus").textContent="تعذر التحويل";toast("فشل التحويل: "+e.message)}finally{$c("cvGo").disabled=false}};
 }
 
+function renderVideoStudio(){
+$("toolContent").innerHTML=[
+'<div class="tool-workspace vs-workspace"><span class="section-kicker">SYNEX VIDEO STUDIO</span><h2>استوديو تحرير الفيديو</h2><p>قص ودمج وتحويل الفيديو، إضافة التأثيرات والكتابة والصوت، ثم معاينة النتيجة وتنزيلها. تتم المعالجة داخل المتصفح باستخدام FFmpeg.</p>',
+'<div class="vs-layout"><section class="vs-preview-card"><div class="vs-preview-head"><b>معاينة الفيديو</b><span id="vsMeta">لم يتم اختيار فيديو</span></div><video id="vsPreview" controls playsinline></video><div class="vs-preview-tools"><button class="ghost-btn" id="vsSnapshot" disabled>التقاط صورة من الإطار</button><button class="ghost-btn" id="vsSeekStart" disabled>تحديد البداية من المشغل</button><button class="ghost-btn" id="vsSeekEnd" disabled>تحديد النهاية من المشغل</button></div><div class="vs-output hidden" id="vsOutput"><b>النتيجة الجاهزة</b><video id="vsResultPreview" controls playsinline></video><a id="vsDownload" class="primary-btn" download>تنزيل النتيجة</a></div></section>',
+'<section class="compress-panel vs-panel"><div class="vs-section-title"><b>1 — ملف الفيديو</b><small>اختر ملفاً واحداً للتحرير</small></div><label class="file-drop" for="vsFile"><span class="drop-symbol">▶</span><strong>اختر فيديو من جهازك</strong><small>MP4 · WEBM · MOV · MKV · AVI وغيرها</small></label><input id="vsFile" type="file" accept="video/*,.mp4,.webm,.mov,.mkv,.avi,.m4v" class="hidden"><div class="picked-file hidden" id="vsPicked"></div>',
+'<div class="vs-section-title"><b>2 — القص والتصدير</b><small>حدد المقطع والصيغة والجودة</small></div><div class="vs-fields"><label>من الثانية<input id="vsStart" type="number" min="0" step="0.1" value="0"></label><label>إلى الثانية<input id="vsEnd" type="number" min="0" step="0.1" placeholder="نهاية الفيديو"></label><label>صيغة الإخراج<select id="vsFormat"><option value="mp4">MP4</option><option value="webm">WEBM</option><option value="gif">GIF متحرك</option><option value="mp3">MP3 صوت فقط</option><option value="wav">WAV صوت فقط</option></select></label><label>الدقة<select id="vsResolution"><option value="original">الأصلية</option><option value="360">360p</option><option value="480">480p</option><option value="720" selected>720p</option><option value="1080">1080p</option></select></label><label>الجودة<select id="vsQuality"><option value="18">عالية جداً</option><option value="23" selected>متوازنة</option><option value="28">حجم أصغر</option><option value="32">ضغط قوي</option></select></label><label>سرعة الفيديو<select id="vsSpeed"><option value="0.5">0.5× بطيء</option><option value="0.75">0.75×</option><option value="1" selected>1× طبيعي</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option><option value="2">2× سريع</option></select></label></div>',
+'<div class="vs-section-title"><b>3 — الصورة والحركة</b><small>تأثيرات لونية وتحكم بالإطار</small></div><div class="vs-fields"><label>التأثير<select id="vsEffect"><option value="none">بدون تأثير</option><option value="cinema">سينمائي</option><option value="mono">أبيض وأسود</option><option value="sepia">سيبيا قديم</option><option value="vivid">ألوان قوية</option><option value="neon">Neon Glow</option><option value="blur">تمويه Blur</option><option value="sharp">زيادة الحدة Sharpen</option></select></label><label>التدوير<select id="vsRotate"><option value="0">0°</option><option value="90">90°</option><option value="180">180°</option><option value="270">270°</option></select></label><label>القلب<select id="vsFlip"><option value="none">بدون</option><option value="h">أفقي</option><option value="v">عمودي</option><option value="both">أفقي وعمودي</option></select></label><label>التقريب / التبعيد<select id="vsZoom"><option value="0.8">0.8× تبعيد</option><option value="0.9">0.9×</option><option value="1" selected>1× طبيعي</option><option value="1.1">1.1×</option><option value="1.25">1.25×</option><option value="1.5">1.5× تقريب</option></select></label><label>السطوع<input id="vsBrightness" type="range" min="-0.2" max="0.2" value="0" step="0.02"></label><label>التباين<input id="vsContrast" type="range" min="0.5" max="1.8" value="1" step="0.05"></label><label>تشبع الألوان<input id="vsSaturation" type="range" min="0" max="2" value="1" step="0.05"></label></div><div class="vs-checks"><label><input id="vsMute" type="checkbox"> كتم صوت الفيديو الأصلي</label><label><input id="vsFade" type="checkbox"> تدرّج دخول وخروج الصورة</label></div>',
+'<div class="vs-section-title"><b>4 — الكتابة والعلامة المائية</b><small>نص ملوّن يظهر في الوقت الذي تحدده</small></div><label>الكلام الذي تريد وضعه على الفيديو<textarea id="vsText" rows="2" placeholder="اكتب عنواناً أو تعليقاً أو اسمك..."></textarea></label><div class="vs-fields"><label>لون الكلام<input id="vsTextColor" type="color" value="#ffffff"></label><label>لون الحدود<input id="vsTextStroke" type="color" value="#111111"></label><label>حجم الخط<input id="vsTextSize" type="range" min="18" max="100" value="44"></label><label>مكان النص<select id="vsTextPosition"><option value="bottom">أسفل</option><option value="center">الوسط</option><option value="top">أعلى</option></select></label><label>ظهور النص من<input id="vsTextStart" type="number" min="0" step="0.1" value="0"></label><label>اختفاء النص عند<input id="vsTextEnd" type="number" min="0" step="0.1" placeholder="نهاية المقطع"></label></div><div class="vs-checks"><label><input id="vsTextOutline" type="checkbox" checked> حدود وظل للنص</label><label><input id="vsTextBox" type="checkbox"> خلفية شفافة داكنة خلف الكلام</label></div>',
+'<div class="vs-section-title"><b>5 — الموسيقى والتعليق الصوتي</b><small>اختر صوتاً خارجياً أو سجّل صوتك</small></div><label class="file-drop vs-audio-drop" for="vsAudio"><span class="drop-symbol">♫</span><strong>إضافة موسيقى أو تعليق صوتي</strong><small>سيحل الصوت المختار محل الصوت الأصلي؛ أزل خيار الكتم عند عدم إضافة صوت</small></label><input id="vsAudio" type="file" accept="audio/*,.mp3,.wav,.m4a,.ogg,.webm" class="hidden"><div class="picked-file hidden" id="vsAudioInfo"></div><label class="vs-volume">مستوى الصوت الخارجي <input id="vsVolume" type="range" min="0" max="1.5" step="0.05" value="1"></label><div class="vs-recorder"><button class="ghost-btn" id="vsRecord">● تسجيل تعليق صوتي</button><button class="ghost-btn" id="vsStopRecord" disabled>■ إيقاف التسجيل</button><span id="vsRecordStatus">لم يبدأ التسجيل</span></div>',
+'<div class="vs-section-title"><b>6 — دمج عدة مقاطع</b><small>ادمج مقطعين أو أكثر في فيديو واحد</small></div><label class="file-drop" for="vsMergeFiles"><span class="drop-symbol">＋</span><strong>اختر عدة فيديوهات بالترتيب</strong><small>اخترها بالترتيب الذي تريد دمجها به</small></label><input id="vsMergeFiles" type="file" accept="video/*" multiple class="hidden"><div class="picked-file hidden" id="vsMergeInfo"></div><button class="ghost-btn action-wide" id="vsMerge" disabled>دمج المقاطع وتنزيل MP4</button>',
+'<div class="vs-actions"><button class="primary-btn action-wide" id="vsExport" disabled>تطبيق التعديلات وتصدير الفيديو</button><div class="vs-quick-actions"><button class="ghost-btn" id="vsMp3" disabled>استخراج MP3</button><button class="ghost-btn" id="vsWav" disabled>استخراج WAV</button><button class="ghost-btn" id="vsGif" disabled>تحويل إلى GIF</button></div></div><div class="progress-wrap hidden" id="vsProgress"><div class="progress-track"><span id="vsBar"></span></div><small id="vsStatus">جاهز</small></div><p class="compression-note">المعالجة تتم على جهازك. ملفات الفيديو الكبيرة قد تستهلك ذاكرة ووقتاً كبيرين. لا يمكن ضمان أن كل الترميزات تعمل على كل الملفات؛ بعض الحاويات أو المؤثرات قد لا تكون متاحة في نسخة FFmpeg المستخدمة.</p></section></div></div>'
+].join("");
+const el=id=>$(id);
+let sourceFile=null,sourceUrl="",resultUrl="",mergeFiles=[],recordedVoice=null,recorder=null,recordChunks=[],busy=false,engine=null;
+const video=el("vsPreview");
+function showError(message){toast(message);el("vsStatus").textContent=message}
+function safeName(name){return (name||"file").replace(/\.[^.]+$/,"").replace(/[^a-z0-9_-]+/gi,"-").slice(0,40)||"video"}
+function setBusy(value){busy=value;["vsExport","vsMp3","vsWav","vsGif","vsMerge"].forEach(id=>{const b=el(id);if(b)b.disabled=value||(id==="vsMerge"?!mergeFiles.length:!sourceFile)})}
+function updateProgress(ratio,label){el("vsProgress").classList.remove("hidden");el("vsBar").style.width=Math.max(1,Math.min(100,Math.round((ratio||0)*100)))+"%";el("vsStatus").textContent=label||"جارٍ المعالجة..."}
+async function getEngine(){
+if(!window.FFmpeg)throw Error("مكتبة FFmpeg لم تُحمّل. أعد تحميل الصفحة مع اتصال بالإنترنت.");
+if(!window.synexFF)window.synexFF=window.FFmpeg.createFFmpeg({log:false,corePath:"https://unpkg.com/@ffmpeg/core@0.11.0/dist/ffmpeg-core.js",progress:p=>{const bar=document.getElementById("vsBar")||document.getElementById("cvBar");if(bar)bar.style.width=Math.max(1,Math.min(100,Math.round((p.ratio||0)*100)))+"%";const status=document.getElementById("vsStatus")||document.getElementById("cvStatus");if(status)status.textContent="جارٍ تنفيذ FFmpeg..."}});
+if(!window.synexFF.isLoaded()){updateProgress(.03,"تحميل محرك الفيديو لأول مرة...");await window.synexFF.load()}
+engine=window.synexFF;return engine;
+}
+function videoExt(file){return ((file.name.split(".").pop()||"mp4").toLowerCase().replace(/[^a-z0-9]/g,"")||"mp4")}
+function setSource(file){
+if(sourceUrl)URL.revokeObjectURL(sourceUrl);
+sourceFile=file;sourceUrl=URL.createObjectURL(file);video.src=sourceUrl;el("vsPicked").textContent=file.name+" — "+formatBytes(file.size);el("vsPicked").classList.remove("hidden");
+["vsExport","vsMp3","vsWav","vsGif","vsSnapshot","vsSeekStart","vsSeekEnd"].forEach(id=>el(id).disabled=false);
+el("vsMeta").textContent=file.name+" — "+formatBytes(file.size);
+video.onloadedmetadata=()=>{el("vsEnd").value=Number.isFinite(video.duration)?video.duration.toFixed(1):"";el("vsStart").max=video.duration||"";el("vsEnd").max=video.duration||"";el("vsMeta").textContent=file.name+" • "+video.videoWidth+"×"+video.videoHeight+" • "+(Number.isFinite(video.duration)?video.duration.toFixed(1)+" ثانية":"مدة غير معروفة")};
+}
+el("vsFile").onchange=()=>{const file=el("vsFile").files[0];if(file)setSource(file)};
+el("vsMergeFiles").onchange=()=>{mergeFiles=Array.from(el("vsMergeFiles").files||[]);el("vsMergeInfo").textContent=mergeFiles.length+" مقاطع • "+formatBytes(mergeFiles.reduce((n,f)=>n+f.size,0));el("vsMergeInfo").classList.toggle("hidden",!mergeFiles.length);el("vsMerge").disabled=mergeFiles.length<2||busy};
+el("vsAudio").onchange=()=>{const f=el("vsAudio").files[0];if(f){recordedVoice=null;el("vsAudioInfo").textContent=f.name+" — "+formatBytes(f.size);el("vsAudioInfo").classList.remove("hidden")}else el("vsAudioInfo").classList.add("hidden")};
+el("vsSeekStart").onclick=()=>{el("vsStart").value=video.currentTime.toFixed(1)};
+el("vsSeekEnd").onclick=()=>{el("vsEnd").value=video.currentTime.toFixed(1)};
+function downloadBlob(blob,name,type){
+const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),60000);
+saveActivityFile(name,"Video Studio",name,blob).catch(()=>recordActivity(name,"Video Studio"));
+if(type==="video"){if(resultUrl)URL.revokeObjectURL(resultUrl);resultUrl=URL.createObjectURL(blob);el("vsResultPreview").src=resultUrl;el("vsDownload").href=resultUrl;el("vsDownload").download=name;el("vsOutput").classList.remove("hidden")}
+}
+function snapshot(){
+if(!video.videoWidth||!video.videoHeight){showError("اختر فيديو وانتظر ظهور المعاينة أولاً.");return}
+const c=document.createElement("canvas");c.width=video.videoWidth;c.height=video.videoHeight;c.getContext("2d").drawImage(video,0,0,c.width,c.height);
+c.toBlob(b=>{if(!b){showError("تعذر التقاط الإطار الحالي.");return}downloadBlob(b,safeName(sourceFile.name)+"-frame.png","image") },"image/png");
+}
+el("vsSnapshot").onclick=snapshot;
+function makeTextOverlay(width,height){
+const text=el("vsText").value.trim();if(!text)return null;
+const c=document.createElement("canvas");c.width=width;c.height=height;const ctx=c.getContext("2d");
+const px=Number(el("vsTextSize").value),color=el("vsTextColor").value,stroke=el("vsTextStroke").value,lines=text.split(/\r?\n/).slice(0,5);
+ctx.font="bold "+px+"px Arial, sans-serif";ctx.textAlign="center";ctx.textBaseline="middle";ctx.direction=/[\u0600-\u06ff]/.test(text)?"rtl":"ltr";
+const lineHeight=px*1.35,total=lineHeight*lines.length;let y=el("vsTextPosition").value==="top"?total/2+24:el("vsTextPosition").value==="center"?height/2:height-total/2-35;
+if(el("vsTextBox").checked){const widest=Math.max.apply(null,lines.map(t=>ctx.measureText(t).width))+38;ctx.fillStyle="rgba(0,0,0,.48)";ctx.fillRect((width-widest)/2,y-total/2-8,widest,total+16)}
+lines.forEach((line,i)=>{const yy=y-total/2+lineHeight*(i+.5);if(el("vsTextOutline").checked){ctx.lineWidth=Math.max(2,px*.09);ctx.strokeStyle=stroke;ctx.shadowColor="rgba(0,0,0,.55)";ctx.shadowBlur=8;ctx.strokeText(line,width/2,yy)}ctx.shadowBlur=0;ctx.fillStyle=color;ctx.fillText(line,width/2,yy)});
+return new Promise((resolve,reject)=>c.toBlob(b=>b?resolve(b):reject(Error("تعذر إنشاء طبقة النص")), "image/png"));
+}
+function getVideoFilters(duration,speed){
+const filters=[],rotate=el("vsRotate").value,flip=el("vsFlip").value,zoom=Number(el("vsZoom").value),resolution=el("vsResolution").value,effect=el("vsEffect").value;
+if(rotate==="90")filters.push("transpose=1");if(rotate==="270")filters.push("transpose=2");if(rotate==="180")filters.push("hflip","vflip");
+if(flip==="h"||flip==="both")filters.push("hflip");if(flip==="v"||flip==="both")filters.push("vflip");
+if(zoom>1){filters.push("scale=iw*"+zoom+":ih*"+zoom+",crop=iw/"+zoom+":ih/"+zoom)}
+else if(zoom<1){filters.push("scale=iw*"+zoom+":ih*"+zoom+",pad=ceil(iw/"+zoom+"/2)*2:ceil(ih/"+zoom+"/2)*2:(ow-iw)/2:(oh-ih)/2")}
+if(resolution!=="original")filters.push("scale=-2:"+resolution);
+if(effect==="mono")filters.push("hue=s=0");
+if(effect==="sepia")filters.push("colorchannelmixer=.393:.769:.189:0:.349:.686:.168:0:.272:.534:.131");
+if(effect==="cinema")filters.push("eq=contrast=1.15:saturation=1.18:brightness=0.02");
+if(effect==="vivid")filters.push("eq=contrast=1.12:saturation=1.55");
+if(effect==="neon")filters.push("eq=contrast=1.25:saturation=1.8:brightness=0.02","unsharp=5:5:0.8");
+if(effect==="blur")filters.push("boxblur=2:1");
+if(effect==="sharp")filters.push("unsharp=5:5:0.8:3:3:0.4");
+const brightness=Number(el("vsBrightness").value),contrast=Number(el("vsContrast").value),saturation=Number(el("vsSaturation").value);
+if(brightness!==0||contrast!==1||saturation!==1)filters.push("eq=brightness="+brightness+":contrast="+contrast+":saturation="+saturation);
+if(speed!==1)filters.push("setpts=PTS/"+speed);
+if(el("vsFade").checked&&duration>1){filters.push("fade=t=in:st=0:d=0.5","fade=t=out:st="+Math.max(0,duration/speed-.5)+":d=0.5")}
+return filters;
+}
+async function exportVideo(forced){
+if(!sourceFile||busy)return;
+const format=forced||el("vsFormat").value;
+if(!["mp4","webm","gif","mp3","wav"].includes(format)){showError("صيغة الإخراج غير مدعومة.");return}
+let start=Math.max(0,Number(el("vsStart").value)||0),end=Number(el("vsEnd").value)||Number(video.duration)||0;
+if(end>0&&end<=start){showError("وقت النهاية يجب أن يكون أكبر من وقت البداية.");return}
+if(end>0&&Number.isFinite(video.duration)&&end>video.duration+.1){showError("وقت النهاية يتجاوز مدة الفيديو.");return}
+const duration=end>0?end-start:Math.max(0,(video.duration||0)-start),speed=Number(el("vsSpeed").value)||1;
+setBusy(true);el("vsExport").disabled=true;
+let f=null,names=[];
+try{
+f=await getEngine();
+const input="vs-source."+videoExt(sourceFile),output="vs-result."+format;
+f.FS("writeFile",input,await window.FFmpeg.fetchFile(sourceFile));names.push(input);
+let args=["-i",input];if(start>0)args.push("-ss",String(start));if(duration>0)args.push("-t",String(duration));
+if(format==="mp3"||format==="wav"){
+args.push("-vn","-map","0:a:0");if(format==="mp3")args.push("-c:a","libmp3lame","-q:a","2");else args.push("-c:a","pcm_s16le");
+args.push("-y",output);
+}else{
+const filters=getVideoFilters(duration,speed),text=el("vsText").value.trim(),w=video.videoWidth||1280,h=video.videoHeight||720;
+let overlayIndex=-1,audioIndex=-1;
+if(text){const overlay=await makeTextOverlay(w,h),overlayName="vs-text.png";f.FS("writeFile",overlayName,new Uint8Array(await overlay.arrayBuffer()));names.push(overlayName);args.push("-loop","1","-i",overlayName);overlayIndex=1}
+const audioFile=el("vsAudio").files[0]||recordedVoice;
+if(audioFile){const audioName="vs-extra-audio."+((audioFile.name&&audioFile.name.split(".").pop())||"webm").replace(/[^a-z0-9]/gi,"");f.FS("writeFile",audioName,await window.FFmpeg.fetchFile(audioFile));names.push(audioName);args.push("-i",audioName);audioIndex=overlayIndex>=0?2:1}
+if(format==="gif"){
+let base="[0:v]"+(filters.length?filters.join(",")+",":"")+"fps=12,scale=480:-1:flags=lanczos";
+if(overlayIndex>=0)base="[0:v]"+(filters.length?filters.join(",")+",":"")+"null[vpre];[vpre][1:v]overlay=0:0:enable='between(t,"+(Number(el("vsTextStart").value)||0)+","+(Number(el("vsTextEnd").value)||duration||99999)+")'[vtxt];[vtxt]fps=12,scale=480:-1:flags=lanczos";
+args.push("-filter_complex",base+",split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse[vout]","-map","[vout]","-loop","0","-an","-y",output);
+}else{
+const textStart=Math.max(0,Number(el("vsTextStart").value)||0),textEnd=Number(el("vsTextEnd").value)||duration||99999;
+if(overlayIndex>=0){
+const vf=filters.length?filters.join(","):"null";
+args.push("-filter_complex","[0:v]"+vf+"[vbase];[vbase][1:v]overlay=0:0:enable='between(t,"+textStart+","+textEnd+")'[vout]","-map","[vout]");
+}else if(filters.length)args.push("-vf",filters.join(","));
+if(audioIndex>=0){args.push("-map",audioIndex+":a:0","-af","volume="+Number(el("vsVolume").value),"-c:a","aac","-b:a","160k","-shortest")}
+else if(el("vsMute").checked)args.push("-an");
+else args.push("-map","0:a?");
+if(format==="webm")args.push("-c:v","libvpx","-b:v","1M","-c:a","libvorbis");
+else args.push("-c:v","libx264","-preset","ultrafast","-crf",el("vsQuality").value,"-pix_fmt","yuv420p","-c:a","aac","-b:a","128k","-movflags","+faststart");
+args.push("-y",output);
+}
+}
+updateProgress(.08,"جارٍ تطبيق التعديلات...");await f.run(...args);
+const data=f.FS("readFile",output),mime=format==="mp3"?"audio/mpeg":format==="wav"?"audio/wav":format==="gif"?"image/gif":format==="webm"?"video/webm":"video/mp4",blob=new Blob([data],{type:mime});
+if(!blob.size)throw Error("لم ينتج FFmpeg ملفاً. ربما لا يحتوي الفيديو على صوت أو أن الترميز غير مدعوم.");
+const name=safeName(sourceFile.name)+"-SYNEX."+format;downloadBlob(blob,name,format==="mp4"||format==="webm"?"video":"other");updateProgress(1,"اكتمل التصدير: "+name);toast("اكتمل التصدير");
+}catch(e){console.error(e);showError("تعذر التصدير: "+(e.message||"خطأ FFmpeg"))}
+finally{if(f)names.forEach(n=>{try{f.FS("unlink",n)}catch(_){}});setBusy(false)}
+}
+el("vsExport").onclick=()=>exportVideo();
+el("vsMp3").onclick=()=>exportVideo("mp3");
+el("vsWav").onclick=()=>exportVideo("wav");
+el("vsGif").onclick=()=>exportVideo("gif");
+el("vsMerge").onclick=async()=>{
+if(mergeFiles.length<2||busy)return;
+const total=mergeFiles.reduce((n,f)=>n+f.size,0);if(total>450*1024*1024&&!confirm("حجم المقاطع كبير وقد يستهلك ذاكرة كبيرة. هل تريد المتابعة؟"))return;
+setBusy(true);let f=null,names=[];
+try{
+f=await getEngine();const list=[];
+for(let i=0;i<mergeFiles.length;i++){const name="vs-merge-"+i+"."+videoExt(mergeFiles[i]);f.FS("writeFile",name,await window.FFmpeg.fetchFile(mergeFiles[i]));names.push(name);list.push("file '"+name+"'")}
+const listName="vs-concat.txt",output="vs-merged.mp4";f.FS("writeFile",listName,new TextEncoder().encode(list.join("\n")));names.push(listName);
+updateProgress(.05,"جارٍ دمج "+mergeFiles.length+" مقاطع...");
+await f.run("-f","concat","-safe","0","-i",listName,"-c:v","libx264","-preset","ultrafast","-crf","23","-pix_fmt","yuv420p","-c:a","aac","-movflags","+faststart","-y",output);
+const data=f.FS("readFile",output),blob=new Blob([data],{type:"video/mp4"});if(!blob.size)throw Error("لم ينتج ملف الدمج");
+downloadBlob(blob,"SYNEX-Merged.mp4","video");updateProgress(1,"اكتمل دمج المقاطع");toast("تم تجهيز الفيديو المدمج");
+}catch(e){console.error(e);showError("تعذر الدمج. جرّب مقاطع لها نفس الدقة ومعدل الإطارات والمسارات الصوتية. "+(e.message||""))}
+finally{if(f)names.forEach(n=>{try{f.FS("unlink",n)}catch(_){}});setBusy(false)}
+};
+el("vsRecord").onclick=async()=>{
+if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia||!window.MediaRecorder){showError("تسجيل الصوت غير مدعوم في هذا المتصفح.");return}
+try{const stream=await navigator.mediaDevices.getUserMedia({audio:true});recordChunks=[];recorder=new MediaRecorder(stream);recorder.ondataavailable=e=>{if(e.data&&e.data.size)recordChunks.push(e.data)};recorder.onstop=()=>{recordedVoice=new Blob(recordChunks,{type:recorder.mimeType||"audio/webm"});stream.getTracks().forEach(t=>t.stop());el("vsRecordStatus").textContent="تم تسجيل التعليق الصوتي — "+formatBytes(recordedVoice.size);el("vsAudioInfo").textContent="تسجيل ميكروفون — "+formatBytes(recordedVoice.size);el("vsAudioInfo").classList.remove("hidden");el("vsAudio").value="";el("vsStopRecord").disabled=true;el("vsRecord").disabled=false};recorder.start();el("vsRecord").disabled=true;el("vsStopRecord").disabled=false;el("vsRecordStatus").textContent="جارٍ التسجيل... اسمح للمتصفح باستخدام الميكروفون"}
+catch(e){showError("تعذر الوصول إلى الميكروفون: "+e.message)}
+};
+el("vsStopRecord").onclick=()=>{if(recorder&&recorder.state!=="inactive")recorder.stop()};
+video.addEventListener("loadedmetadata",()=>{const ready=!!sourceFile;el("vsSnapshot").disabled=!ready;el("vsSeekStart").disabled=!ready;el("vsSeekEnd").disabled=!ready});
+window.addEventListener("beforeunload",()=>{if(sourceUrl)URL.revokeObjectURL(sourceUrl);if(resultUrl)URL.revokeObjectURL(resultUrl)},{once:true});
+}
+function renderTextLab(){
+$("toolContent").innerHTML=[
+'<div class="tool-workspace textlab-workspace"><span class="section-kicker">SYNEX TEXT LAB</span><h2>مختبر النصوص</h2><p>أدوات مجانية للنصوص وكلمات المرور. كل العمليات تتم محلياً في متصفحك.</p>',
+'<div class="compress-panel"><div class="vs-section-title"><b>1 — مولّد كلمات المرور</b><small>أنشئ كلمة مرور عشوائية قابلة للتخصيص</small></div><div class="vs-fields"><label>عدد الأحرف<input id="tlLength" type="number" min="8" max="64" value="20"></label><label>النمط<select id="tlPreset"><option value="all">قوية — أحرف وأرقام ورموز</option><option value="letters">أحرف وأرقام</option><option value="simple">أحرف وأرقام سهلة القراءة</option></select></label></div><div class="vs-checks"><label><input id="tlUpper" type="checkbox" checked> أحرف كبيرة</label><label><input id="tlLower" type="checkbox" checked> أحرف صغيرة</label><label><input id="tlNumbers" type="checkbox" checked> أرقام</label><label><input id="tlSymbols" type="checkbox" checked> رموز خاصة</label></div><div class="tl-password-row"><input id="tlPassword" readonly value="" placeholder="كلمة المرور ستظهر هنا"><button class="primary-btn" id="tlGenerate">إنشاء كلمة مرور</button><button class="ghost-btn" id="tlCopyPassword">نسخ</button></div><small id="tlStrength" class="compression-note">اختر الخيارات ثم أنشئ كلمة مرور.</small>',
+'<div class="vs-section-title"><b>2 — عدّاد الكلمات والأحرف</b><small>يتحدث تلقائياً أثناء الكتابة</small></div><textarea id="tlCounterText" rows="7" placeholder="اكتب أو الصق النص هنا..."></textarea><div class="tl-stats"><div><small>الكلمات</small><b id="tlWords">0</b></div><div><small>الأحرف</small><b id="tlChars">0</b></div><div><small>بدون مسافات</small><b id="tlNoSpaces">0</b></div><div><small>الأسطر</small><b id="tlLines">0</b></div><div><small>الفقرات</small><b id="tlParagraphs">0</b></div><div><small>وقت القراءة</small><b id="tlReadTime">0 دقيقة</b></div></div><div class="tl-buttons"><button class="ghost-btn" id="tlClearCount">مسح النص</button><button class="ghost-btn" id="tlCopyCount">نسخ النص</button></div>',
+'<div class="vs-section-title"><b>3 — مقارنة نصّين</b><small>يعرض الأسطر المضافة والمحذوفة والمشتركة</small></div><div class="vs-fields tl-compare"><label>النص الأول<textarea id="tlCompareA" rows="7" placeholder="ضع النص الأول هنا"></textarea></label><label>النص الثاني<textarea id="tlCompareB" rows="7" placeholder="ضع النص الثاني هنا"></textarea></label></div><button class="primary-btn action-wide" id="tlCompare">قارن النصين</button><div id="tlDiff" class="tl-diff hidden"></div>',
+'<div class="vs-section-title"><b>4 — تنسيق وتنظيف النصوص</b><small>عدّل النص ثم انسخ النتيجة</small></div><textarea id="tlFormatText" rows="8" placeholder="ضع النص المراد تنسيقه هنا..."></textarea><div class="tl-buttons"><button class="ghost-btn" data-format="trim">إزالة الفراغات الزائدة</button><button class="ghost-btn" data-format="blank">حذف الأسطر الفارغة</button><button class="ghost-btn" data-format="duplicates">حذف الأسطر المكررة</button><button class="ghost-btn" data-format="sort">ترتيب أبجدي</button><button class="ghost-btn" data-format="upper">UPPERCASE</button><button class="ghost-btn" data-format="lower">lowercase</button><button class="ghost-btn" data-format="title">أول حرف كبير</button><button class="ghost-btn" data-format="reverse">عكس ترتيب الكلمات</button><button class="ghost-btn" data-format="number">ترقيم الأسطر</button><button class="ghost-btn" data-format="reverseChars">عكس الأحرف</button><button class="ghost-btn" data-format="collapse">دمج المسافات</button><button class="ghost-btn" data-format="copy">نسخ النتيجة</button></div><p class="compression-note" id="tlFormatStatus">اختر عملية من الأزرار أعلاه.</p></div></div>'
+].join("");
+const el=id=>$(id);
+function copyText(value){if(navigator.clipboard&&navigator.clipboard.writeText)return navigator.clipboard.writeText(value).then(()=>toast("تم النسخ")).catch(()=>fallbackCopy(value));fallbackCopy(value)}
+function fallbackCopy(value){const area=document.createElement("textarea");area.value=value;area.style.position="fixed";area.style.opacity="0";document.body.append(area);area.select();try{document.execCommand("copy");toast("تم النسخ")}catch(_){toast("حدد النص وانسخه يدوياً")}area.remove()}
+function updateCount(){
+const t=el("tlCounterText").value,words=t.trim()?t.trim().split(/\s+/).length:0,lines=t.length?t.split(/\r?\n/).length:0,paragraphs=t.trim()?t.trim().split(/\n\s*\n/).filter(Boolean).length:0;
+el("tlWords").textContent=words.toLocaleString();el("tlChars").textContent=t.length.toLocaleString();el("tlNoSpaces").textContent=t.replace(/\s/g,"").length.toLocaleString();el("tlLines").textContent=lines.toLocaleString();el("tlParagraphs").textContent=paragraphs.toLocaleString();el("tlReadTime").textContent=words?Math.max(1,Math.ceil(words/200))+" دقيقة":"0 دقيقة";
+}
+el("tlCounterText").addEventListener("input",updateCount);el("tlClearCount").onclick=()=>{el("tlCounterText").value="";updateCount()};el("tlCopyCount").onclick=()=>copyText(el("tlCounterText").value);
+el("tlGenerate").onclick=()=>{
+const length=Math.max(8,Math.min(64,Number(el("tlLength").value)||20)),preset=el("tlPreset").value;
+let pool="";if(el("tlUpper").checked)pool+="ABCDEFGHJKLMNPQRSTUVWXYZ";if(el("tlLower").checked)pool+="abcdefghijkmnopqrstuvwxyz";if(el("tlNumbers").checked)pool+=preset==="simple"?"23456789":"234567890";if(el("tlSymbols").checked&&preset==="all")pool+="!@#$%^&*()-_=+[]{}?";
+if(!pool){toast("اختر نوعاً واحداً على الأقل من الأحرف");return}
+const bytes=new Uint32Array(length);if(window.crypto&&crypto.getRandomValues)crypto.getRandomValues(bytes);else for(let i=0;i<length;i++)bytes[i]=Math.floor(Math.random()*4294967295);
+let result="";for(let i=0;i<length;i++)result+=pool[bytes[i]%pool.length];
+el("tlPassword").value=result;const variety=[el("tlUpper").checked,el("tlLower").checked,el("tlNumbers").checked,el("tlSymbols").checked&&preset==="all"].filter(Boolean).length;el("tlStrength").textContent="طول "+length+" حرفاً • "+(length>=16&&variety>=3?"قوية جداً":length>=12&&variety>=2?"قوية":"متوسطة");
+};
+el("tlCopyPassword").onclick=()=>copyText(el("tlPassword").value);
+function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;")}
+el("tlCompare").onclick=()=>{
+const a=el("tlCompareA").value.split(/\r?\n/),b=el("tlCompareB").value.split(/\r?\n/);
+if(a.length>350||b.length>350){toast("للمقارنة الدقيقة، قلّل النص إلى 350 سطراً أو أقل في كل جهة.");return}
+const dp=Array.from({length:a.length+1},()=>new Uint16Array(b.length+1));
+for(let i=a.length-1;i>=0;i--)for(let j=b.length-1;j>=0;j--)dp[i][j]=a[i]===b[j]?dp[i+1][j+1]+1:Math.max(dp[i+1][j],dp[i][j+1]);
+let i=0,j=0,out=[];while(i<a.length||j<b.length){
+if(i<a.length&&j<b.length&&a[i]===b[j]){out.push('<div class="tl-same"><span> </span>'+esc(a[i])+'</div>');i++;j++}
+else if(j<b.length&&(i===a.length||dp[i][j+1]>=dp[i+1][j])){out.push('<div class="tl-added"><span>+</span>'+esc(b[j])+'</div>');j++}
+else{out.push('<div class="tl-removed"><span>−</span>'+esc(a[i])+'</div>');i++}
+}
+el("tlDiff").innerHTML=out.join("")||"لا يوجد اختلاف";el("tlDiff").classList.remove("hidden");
+};
+el("toolContent").querySelectorAll("[data-format]").forEach(button=>button.onclick=()=>{
+let t=el("tlFormatText").value,lines=t.split(/\r?\n/);
+switch(button.dataset.format){
+case "trim":t=lines.map(x=>x.trim()).join("\n");break;
+case "blank":t=lines.filter(x=>x.trim()).join("\n");break;
+case "duplicates":t=Array.from(new Set(lines)).join("\n");break;
+case "sort":t=lines.sort((a,b)=>a.localeCompare(b,"ar")).join("\n");break;
+case "upper":t=t.toUpperCase();break;
+case "lower":t=t.toLowerCase();break;
+case "title":t=t.replace(/\b([a-z])/gi,m=>m.toUpperCase());break;
+case "reverse":t=lines.map(x=>x.split(/\s+/).reverse().join(" ")).join("\n");break;
+case "number":t=lines.map((x,i)=>(i+1)+". "+x).join("\n");break;
+case "reverseChars":t=Array.from(t).reverse().join("");break;
+case "collapse":t=t.replace(/[ \t]+/g," ").replace(/\n{3,}/g,"\n\n");break;
+case "copy":copyText(t);return;
+}
+el("tlFormatText").value=t;el("tlFormatStatus").textContent="تم تطبيق العملية على النص.";
+});
+}
 function renderCompressor(){
 $("toolContent").innerHTML=`
 <div class="tool-workspace"><span class="section-kicker">SYNEX FILE LAB</span><h2>مختبر ضغط الملفات</h2>
