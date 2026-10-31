@@ -399,7 +399,7 @@ try{
 f=await getEngine();
 const input="vs-source."+videoExt(sourceFile),output="vs-result."+format;
 f.FS("writeFile",input,await window.FFmpeg.fetchFile(sourceFile));names.push(input,output);
-let args=["-i",input];if(start>0)args.push("-ss",String(start));if(duration>0)args.push("-t",String(duration));
+let args=[];if(start>0)args.push("-ss",String(start));if(duration>0)args.push("-t",String(duration));args.push("-i",input);
 if(format==="mp3"||format==="wav"){
 args.push("-vn","-map","0:a:0");if(format==="mp3")args.push("-c:a","libmp3lame","-q:a","2");else args.push("-c:a","pcm_s16le");
 args.push("-y",output);
