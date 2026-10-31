@@ -119,7 +119,7 @@ sent+=buffer.byteLength;setProgress(total?sent/total*100:100,"إرسال "+file.
 }
 const endAck=waitAck("end:"+fi);sendMessage({type:"end",index:fi});await endAck;
 }
-sendMessage({type:"complete",count:files.length});status("اكتمل الإرسال","success");setProgress(100,"تم إرسال "+files.length+" ملف");recordActivity(files.length+" ملف","QuickDrop");
+sendMessage({type:"complete",count:files.length});status("اكتمل الإرسال","success");setProgress(100,"تم إرسال "+files.length+" ملف");await Promise.all(files.map(f=>saveActivityFile(f.name,"QuickDrop sent",f.name,f).catch(()=>null)));recordActivity(files.length+" ملف","QuickDrop sent");
 }catch(e){status(e.message||"تعذر إكمال النقل","error");toast(e.message||"تعذر إكمال النقل")}
 }
 function addReceivedFile(f,blob){
@@ -180,9 +180,9 @@ function renderScreenText(){
 $("toolContent").innerHTML='<div class="tool-workspace"><span class="section-kicker">SCREEN TEXT / OCR</span><h2>استخراج النص من الصور</h2><div class="compress-panel"><label class="file-drop" for="ocrFile"><span class="drop-symbol">▧</span><strong>اختر صورة</strong><small>PNG / JPG / WEBP</small></label><input id="ocrFile" type="file" accept="image/*" class="hidden"><div id="ocrPreview" class="qr-preview hidden"><img id="ocrImage" alt="الصورة المختارة"></div><select id="ocrLang"><option value="eng">English</option><option value="ara">العربية</option><option value="fra">Français</option></select><button class="primary-btn action-wide" id="runOcr" disabled>استخراج النص</button><div class="progress-wrap hidden" id="ocrProgress"><div class="progress-track"><span id="ocrBar"></span></div><small id="ocrStatus">جارٍ التحضير</small></div><textarea id="ocrText" rows="9" placeholder="سيظهر النص المستخرج هنا"></textarea><div class="qr-actions"><button class="ghost-btn" id="copyOcr">نسخ</button><button class="ghost-btn" id="saveOcr">تنزيل TXT</button></div></div></div>';
 let file=null,url="";
 $("ocrFile").onchange=()=>{file=$("ocrFile").files[0];if(!file)return;if(url)URL.revokeObjectURL(url);url=URL.createObjectURL(file);$("ocrImage").src=url;$("ocrPreview").classList.remove("hidden");$("runOcr").disabled=false};
-$("runOcr").onclick=async()=>{if(!file)return;if(!window.Tesseract){toast("تعذر تحميل محرك OCR؛ تحقق من الاتصال");return}$("runOcr").disabled=true;$("ocrProgress").classList.remove("hidden");try{const lang=$("ocrLang").value;const result=await Tesseract.recognize(file,lang,{logger:m=>{if(m.progress!==undefined){$("ocrBar").style.width=Math.round(m.progress*100)+"%";$("ocrStatus").textContent=m.status||"جارٍ التعرف"}}});$("ocrText").value=result.data.text||"";recordActivity(file.name,"OCR");toast("اكتمل استخراج النص")}catch(e){toast("تعذر OCR: "+e.message)}finally{$("runOcr").disabled=false}};
+$("runOcr").onclick=async()=>{if(!file)return;if(!window.Tesseract){toast("تعذر تحميل محرك OCR؛ تحقق من الاتصال");return}$("runOcr").disabled=true;$("ocrProgress").classList.remove("hidden");try{const lang=$("ocrLang").value;const result=await Tesseract.recognize(file,lang,{logger:m=>{if(m.progress!==undefined){$("ocrBar").style.width=Math.round(m.progress*100)+"%";$("ocrStatus").textContent=m.status||"جارٍ التعرف"}}});$("ocrText").value=result.data.text||"";saveActivityFile(file.name,"OCR result","SYNEX-OCR.txt",new Blob([result.data.text||""],{type:"text/plain;charset=utf-8"})).catch(e=>recordActivity(file.name,"OCR"));toast("اكتمل استخراج النص")}catch(e){toast("تعذر OCR: "+e.message)}finally{$("runOcr").disabled=false}};
 $("copyOcr").onclick=async()=>{try{await navigator.clipboard.writeText($("ocrText").value);toast("تم النسخ")}catch(_){$("ocrText").select();document.execCommand("copy")}};
-$("saveOcr").onclick=()=>downloadText($("ocrText").value,"SYNEX-OCR.txt");
+$("saveOcr").onclick=()=>{const value=$("ocrText").value;saveActivityFile("OCR text","TXT export","SYNEX-OCR.txt",new Blob([value],{type:"text/plain;charset=utf-8"})).catch(()=>{});downloadText(value,"SYNEX-OCR.txt")};
 }
 function downloadText(value,name){const a=document.createElement("a"),u=URL.createObjectURL(new Blob([value],{type:"text/plain;charset=utf-8"}));a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),10000)}
 function renderVoiceType(){
@@ -254,7 +254,7 @@ $("voiceStop").onclick=()=>{if(rec&&isListening)rec.stop()};
 $("voiceText").addEventListener("input",()=>{finalText=$("voiceText").value});
 $("copyVoice").onclick=async()=>{try{await navigator.clipboard.writeText($("voiceText").value);toast("تم نسخ النص")}catch(_){$("voiceText").select();document.execCommand("copy")}};
 $("clearVoice").onclick=()=>{$("voiceText").value="";finalText="";};
-$("saveVoice").onclick=()=>downloadText($("voiceText").value,"SYNEX-Voice.txt");
+$("saveVoice").onclick=()=>{const value=$("voiceText").value;saveActivityFile("Voice transcription","TXT export","SYNEX-Voice.txt",new Blob([value],{type:"text/plain;charset=utf-8"})).catch(()=>{});downloadText(value,"SYNEX-Voice.txt")};
 const voiceStyles=[
 ["فضائي",1.8,.82],["روبوت",.72,.92],["عميق",.55,.86],["عملاق",.35,.72],["طفولي",1.85,1.12],
 ["كرتوني",1.65,1.22],["سريع",1,1.42],["بطيء",1,.72],["همس هادئ",.92,.82],["مذيع",.94,1],
@@ -295,7 +295,7 @@ const audioStream=new MediaStream(audioTracks);
 const mime=MediaRecorder.isTypeSupported("audio/webm;codecs=opus")?"audio/webm;codecs=opus":"audio/webm";
 recorder=new MediaRecorder(audioStream,{mimeType:mime});
 recorder.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
-recorder.onstop=()=>{const blob=new Blob(chunks,{type:"audio/webm"});downloadBlob(blob,"SYNEX-Voice-"+Date.now()+".webm");audioStream.getTracks().forEach(t=>t.stop());$("speechStatus").textContent="تم تجهيز التسجيل بصيغة WEBM. إذا كان الملف صامتاً، جرّب مشاركة صوت التبويب مرة أخرى."};
+recorder.onstop=()=>{const blob=new Blob(chunks,{type:"audio/webm"}),name="SYNEX-Voice-"+Date.now()+".webm";saveActivityFile(name,"Voice audio",name,blob).catch(()=>{});downloadBlob(blob,name);audioStream.getTracks().forEach(t=>t.stop());$("speechStatus").textContent="تم تجهيز التسجيل بصيغة WEBM وحفظه في سجل الملفات."};
 recorder.start();const utter=new SpeechSynthesisUtterance(text),v=selectedVoice(),style=selectedStyle();utter.pitch=style[1];utter.rate=style[2];if(v){utter.voice=v;utter.lang=v.lang}
 utter.onend=()=>setTimeout(()=>{if(recorder&&recorder.state!=="inactive")recorder.stop()},500);
 utter.onerror=()=>{if(recorder&&recorder.state!=="inactive")recorder.stop();$("speechStatus").textContent="تعذر نطق النص."};
@@ -374,7 +374,7 @@ const actions=document.createElement("div");actions.className="image-thumb-actio
 const view=document.createElement("button");view.className="ghost-btn";view.type="button";view.textContent="عرض";view.title="عرض الصورة";
 const save=document.createElement("button");save.className="ghost-btn";save.type="button";save.textContent="↓";save.title="تنزيل هذه الصورة";
 view.onclick=()=>{const stage=$("previewStage");stage.classList.remove("hidden");$("previewControls").classList.remove("hidden");$("previewImage").src=url;zoom=1;applyZoom();stage.scrollTop=0;stage.scrollLeft=0};
-save.onclick=async()=>{try{const blob=await convertImage(file,$("imageExportFormat").value);downloadBlob(blob,outputImageName(file,$("imageExportFormat").value));recordActivity(file.name,"Image export");toast("تم تجهيز الصورة")}catch(e){toast("تعذر تحويل الصورة: "+e.message)}};
+save.onclick=async()=>{try{const blob=await convertImage(file,$("imageExportFormat").value),name=outputImageName(file,$("imageExportFormat").value);saveActivityFile(file.name,"Image export",name,blob).catch(()=>recordActivity(file.name,"Image export"));downloadBlob(blob,name);toast("تم تجهيز الصورة")}catch(e){toast("تعذر تحويل الصورة: "+e.message)}};
 actions.append(view,save);meta.append(name,size,actions);card.append(img,meta);gallery.append(card);
 });
 $("imagePreviewPanel").classList.remove("hidden");
@@ -383,7 +383,7 @@ $("downloadAllImages").onclick=async()=>{
 const button=$("downloadAllImages");button.disabled=true;
 try{if(!window.fflate)throw Error("مكتبة ZIP غير متاحة");const fmt=$("imageExportFormat").value,ext=fmt==="image/png"?"png":"jpg",entries={};
 for(let i=0;i<images.length;i++){const blob=await convertImage(images[i],fmt);entries[outputImageName(images[i],fmt)]=new Uint8Array(await blob.arrayBuffer());}
-const zipped=fflate.zipSync(entries,{level:0});downloadBlob(new Blob([zipped],{type:"application/zip"}),"SYNEX-Images-"+Date.now()+".zip");recordActivity(images.length+" images","ZIP image export");toast("تم تجهيز أرشيف الصور")}
+const zipped=fflate.zipSync(entries,{level:0});const zipName="SYNEX-Images-"+Date.now()+".zip",zipBlob=new Blob([zipped],{type:"application/zip"});saveActivityFile(images.length+" images","ZIP image export",zipName,zipBlob).catch(()=>recordActivity(images.length+" images","ZIP image export"));downloadBlob(zipBlob,zipName);toast("تم تجهيز أرشيف الصور")}
 catch(e){toast("تعذر إنشاء ZIP: "+e.message)}finally{button.disabled=false}
 };
 }
