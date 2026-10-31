@@ -24,6 +24,7 @@
   <aside class="app-sidebar" id="appSidebar" aria-label="قائمة الأدوات">
     <button class="side-brand" id="sideHome" title="الرئيسية" aria-label="الرئيسية">S</button>
     <div class="side-divider"></div>
+    <button class="side-tool" data-tool="converter" title="Converter" aria-label="Converter">⇄</button>
     <button class="side-tool" data-tool="compressor" title="File Lab" aria-label="File Lab">⇣</button>
     <button class="side-tool" data-tool="qrgenerator" title="QR Generator" aria-label="QR Generator">▦</button>
     <button class="side-tool" data-tool="qrreader" title="QR Reader" aria-label="QR Reader">⌗</button>
@@ -48,7 +49,7 @@
 
     <section class="tools-section" id="tools">
       <div class="section-heading"><div><span class="section-kicker">WORKSPACE</span><h2>اختر أداتك</h2></div><span class="section-hint">6 أدوات • واجهة واحدة</span></div>
-      <div class="tool-grid">
+      <div class="tool-grid"><button class="tool-card converter" data-tool="converter"><span class="tool-icon">⇄</span><span class="tool-tag">UNIVERSAL CONVERTER</span><strong>SYNEX Converter</strong><span class="tool-desc">تحويل الفيديو والصور والصوت والمستندات والملفات المضغوطة، واستخراج الصوت من الفيديو.</span><span class="tool-link">فتح الأداة <b>←</b></span></button>
         <button class="tool-card quickdrop" data-tool="quickdrop">
           <span class="tool-icon">⇧</span><span class="tool-tag">SHARE</span>
           <strong>QuickDrop</strong><span class="tool-desc">نقل الملفات بين الهاتف والكمبيوتر بالجودة الأصلية.</span><span class="tool-link">فتح الأداة <b>←</b></span>
@@ -96,6 +97,8 @@
   <script src="./config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.js"></script>
+  <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>\n  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js"></script>
