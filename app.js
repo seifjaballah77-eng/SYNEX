@@ -98,7 +98,7 @@ $("qdFiles").onchange=()=>{files=Array.from($("qdFiles").files||[]);$("qdFileLis
 $("qdCreate").onclick=()=>{
 if(!files.length)return;cleanup();const p=initPeer();if(!p)return;$("qdCreate").disabled=true;status("جارٍ إنشاء رابط مشاركة...");
 p.on("open",id=>{const u=new URL(location.href);u.searchParams.set("quickdrop",id);$("qdLink").value=u.href;$("qdShare").classList.remove("hidden");$("qdQr").innerHTML="";if(window.QRCode)new QRCode($("qdQr"),{text:u.href,width:220,height:220});else $("qdQr").textContent="تعذر إنشاء QR؛ يمكنك نسخ الرابط.";status("الرابط جاهز — بانتظار اتصال المستلم","success");});
-p.on("connection",incoming=>{if(conn){incoming.close();return}conn=incoming;$("qdRequest").classList.remove("hidden");$("qdRequestText").textContent="وافق على الاتصال من الجهاز الآخر لبدء النقل.";status("طلب اتصال وارد","working");});
+p.on("connection",incoming=>{if(conn){incoming.close();return}conn=incoming;$("qdAccept").disabled=true;incoming.on("open",()=>{$("qdAccept").disabled=false;status("طلب اتصال جاهز — راجع الملفات ثم اقبل","working")});$("qdRequest").classList.remove("hidden");$("qdRequestText").textContent="وافق على الاتصال من الجهاز الآخر لبدء النقل.";status("طلب اتصال وارد","working");});
 };
 $("qdAccept").onclick=()=>{if(!conn)return;accepted=true;bindConnection(conn);sendMessage({type:"ready"});$("qdRequest").classList.add("hidden");$("qdAccept").disabled=true;sendAll()};
 $("qdCopy").onclick=async()=>{try{await navigator.clipboard.writeText($("qdLink").value);toast("تم نسخ الرابط")}catch(_){$("qdLink").select();document.execCommand("copy");toast("انسخ الرابط الآن")}};
