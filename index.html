@@ -21,6 +21,19 @@
     </div>
   </header>
 
+  <aside class="app-sidebar" id="appSidebar" aria-label="قائمة الأدوات">
+    <button class="side-brand" id="sideHome" title="الرئيسية" aria-label="الرئيسية">S</button>
+    <div class="side-divider"></div>
+    <button class="side-tool" data-tool="compressor" title="File Lab" aria-label="File Lab">⇣</button>
+    <button class="side-tool" data-tool="qrgenerator" title="QR Generator" aria-label="QR Generator">▦</button>
+    <button class="side-tool" data-tool="qrreader" title="QR Reader" aria-label="QR Reader">⌗</button>
+    <button class="side-tool" data-tool="screentext" title="ScreenText OCR" aria-label="ScreenText OCR">▧</button>
+    <button class="side-tool" data-tool="voicetype" title="VoiceType" aria-label="VoiceType">♫</button>
+    <button class="side-tool" data-tool="quickdrop" title="QuickDrop" aria-label="QuickDrop">⇧</button>
+    <div class="side-spacer"></div>
+    <button class="side-tool" id="sideHistory" title="السجل" aria-label="السجل">◷</button>
+    <button class="side-tool" id="sideHelp" title="مركز المساعدة" aria-label="مركز المساعدة">?</button>
+  </aside>
   <main>
     <section class="hero">
       <div class="eyebrow"><span class="pulse-dot"></span> مساحة عملك الرقمية</div>
@@ -84,6 +97,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>\n  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <script src="./app.js"></script>
 </body>
 </html>
